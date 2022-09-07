@@ -1,5 +1,6 @@
 import type * as prettier from "prettier";
 import type { FixLockFileIntegrityConfig } from "./types";
+import path from "path";
 
 const LOCK_FILE_NAMES = ["package-lock.json", "npm-shrinkwrap.json"];
 
@@ -11,6 +12,6 @@ export const defaultPrettierOptions: prettier.Options = {
 };
 
 export const defaultFixLockFileIntegrityConfig: FixLockFileIntegrityConfig = {
-    includePaths: [__dirname],
+    includePaths: [path.resolve(__dirname, "..")],
     lockFileNames: LOCK_FILE_NAMES
 };

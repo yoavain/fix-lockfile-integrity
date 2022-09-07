@@ -10,13 +10,6 @@ type Command = {
     config: string
 }
 
-/*
-enum Mode {
-    FILE = "FILE",
-    LOOKUP = "LOOKUP"
-}
-*/
-
 export const main = async () => {
     const cliParams = await yargs(hideBin(process.argv))
         .command<Command>("* [file]", "fix file", (yargs) => {
@@ -33,9 +26,6 @@ export const main = async () => {
             description: "configuration file"
         })
         .parse();
-
-    // todo remove
-    console.log(JSON.stringify({ cliParams: { config: cliParams.config, file: cliParams.file } }, null, 2));
 
     // Read config
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
@@ -54,7 +44,12 @@ export const main = async () => {
 
     for (const lockFile of lockFilesLocations) {
         console.log(`Calling await fixLockFile("${lockFile}");`);
-        await fixLockFile(lockFile);
+        try {
+            await fixLockFile(lockFile);
+        }
+        catch (e) {
+            // do nothing
+        }
     }
 };
 
