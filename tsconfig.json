@@ -1,0 +1,10 @@
+{
+    "extends": "@tsconfig/node14",
+    "compilerOptions": {
+        "strict": false,
+        "esModuleInterop": true,
+        "allowJs": true,
+        "noEmit": true
+    },
+    "include": ["./src/**/*", "./test/**/*", "./integration_test/**/*", "jest.config.ts", "./*.ts"]
+}

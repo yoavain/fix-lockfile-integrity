@@ -1,0 +1,96 @@
+{
+    "name": "fix-lockfile-integrity",
+    "version": "1.0.0",
+    "description": "Fix lockfile integrity",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "fix-lockfile-integrity": "./dist/main.js"
+    },
+    "scripts": {
+        "prepare": "git config --get core.hookspath || husky install",
+        "prebuild": "npm run test",
+        "build": "npm run build:no-test",
+        "build:no-test": "npm run tsc && npm run add-shebang && npm run package",
+        "build:no-test:ci": "npm run tsc && npm run add-shebang && npm prune --production && del package-lock.json && npm shrinkwrap && npm run package",
+        "test": "npm run eslint && npm run type-check && npm run jest",
+        "eslint": "eslint src/ test/ templates/",
+        "eslint:fix": "npm run eslint -- --fix",
+        "type-check": "tsc --build tsconfig.json",
+        "jest": "cross-env FORCE_COLOR=0 jest",
+        "jest:unit": "cross-env FORCE_COLOR=0 jest ./test/",
+        "jest:integration": "cross-env FORCE_COLOR=0 jest ./integration_test/",
+        "prettier": "prettier --write *.json templates/**/*.json",
+        "pretsc": "rimraf dist",
+        "tsc": "tsc --build tsconfig.build.json",
+        "add-shebang": "add-shebang",
+        "start": "ts-node src/index.ts",
+        "start:help": "npm run start -- --help",
+        "package": "npm pack",
+        "pre-commit": "lint-staged"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yoavain/fix-lockfile-integrity.git"
+    },
+    "keywords": [
+        "lockfile",
+        "package-lock.json",
+        "npm-shrinkwrap.json",
+        "integrity",
+        "sha512",
+        "sha1"
+    ],
+    "author": "yoavain",
+    "license": "MIT",
+    "engines": {
+        "node": ">=12 <17",
+        "npm": "<9"
+    },
+    "files": [
+        "dist/**"
+    ],
+    "bugs": {
+        "url": "https://github.com/yoavain/fix-lockfile-integrity/issues"
+    },
+    "homepage": "https://github.com/yoavain/fix-lockfile-integrity#readme",
+    "devDependencies": {
+        "@tsconfig/node14": "1.0.3",
+        "@types/jest": "29.0.0",
+        "@types/node": "18.7.15",
+        "@typescript-eslint/eslint-plugin": "5.36.2",
+        "@typescript-eslint/parser": "5.36.2",
+        "add-shebang": "0.1.0",
+        "cross-env": "7.0.3",
+        "eslint": "8.23.0",
+        "eslint-plugin-import": "2.26.0",
+        "eslint-plugin-jest": "27.0.1",
+        "eslint-plugin-node": "11.1.0",
+        "eslint-plugin-security": "1.5.0",
+        "global-npm": "0.5.0",
+        "husky": "8.0.1",
+        "jest": "28.1.3",
+        "lint-staged": "13.0.3",
+        "rimraf": "3.0.2",
+        "ts-jest": "28.0.8",
+        "ts-node": "10.9.1",
+        "typescript": "4.8.2"
+    },
+    "dependencies": {
+        "cosmiconfig": "7.0.1",
+        "cosmiconfig-typescript-loader": "4.0.0",
+        "got": "11.8.5",
+        "p-limit": "3.1.0",
+        "prettier": "2.7.1",
+        "traverse": "0.6.6",
+        "yargs": "17.5.1"
+    },
+    "lint-staged": {
+        "*.(ts|js)": [
+            "eslint --fix"
+        ],
+        "*.json": [
+            "prettier --write"
+        ]
+    }
+}
