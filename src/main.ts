@@ -40,15 +40,17 @@ export const main = async () => {
         });
     }
 
-    for (const lockFile of lockFilesLocations) {
-        console.log(`Started handling ${lockFile}`);
+    console.log(`Handling ${lockFilesLocations.length} file${lockFilesLocations.length > 1 ? "s" : ""}`);
+    for (let i = 0; i < lockFilesLocations.length; i++) {
+        const lockFile = lockFilesLocations[i];
+        console.log(`Started handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
         try {
             await fixLockFile(lockFile);
         }
         catch (e) {
             // do nothing
         }
-        console.log(`Finished handling ${lockFile}`);
+        console.log(`Finished handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
     }
 };
 
