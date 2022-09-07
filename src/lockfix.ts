@@ -42,13 +42,31 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
     let dirty: boolean = false;
 
     // Read lock file
-    const jsonString: string = fs.readFileSync(lockFileLocation, "utf8");
+    let jsonString: string;
+    try {
+        jsonString = fs.readFileSync(lockFileLocation, "utf8");
+    }
+    catch (e) {
+        console.warn(`${lockFileLocation} does not exist`);
+        return;
+    }
+
+    if (typeof jsonString !== "string" || jsonString.length === 0) {
+        console.warn(`${lockFileLocation} is empty`);
+        return;
+    }
 
     // Identify indentation and EOL
     const jsonStyleOptions: prettier.Options = detectJsonStyle(jsonString);
 
     // Parse lock file
-    const lockFile = JSON.parse(jsonString);
+    let lockFile;
+    try {
+        lockFile = JSON.parse(jsonString);
+    }
+    catch (e) {
+        console.warn("Cannot parse JSON");
+    }
 
     // Collect
     const limit = pLimit(MAX_CONCURRENT_PROMISES);
@@ -84,5 +102,9 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         }
 
         fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
+        console.log("Overwriting lock file");
+    }
+    else {
+        console.log("No change needed for lock file");
     }
 };

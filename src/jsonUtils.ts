@@ -8,9 +8,6 @@ const DEFAULT_INDENT_OPTIONS: prettier.Options = {
     
 export const detectJsonStyle = (jsonString: string): prettier.Options => {
     let style = DEFAULT_INDENT_OPTIONS;
-    if (typeof jsonString !== "string") {
-        return style;
-    }
 
     // Indentation
     if (jsonString !== "{}") {
@@ -20,9 +17,11 @@ export const detectJsonStyle = (jsonString: string): prettier.Options => {
             if (space[0] === "\t") {
                 style.useTabs = true;
                 delete style.tabWidth;
+                console.log("Detected \"Tab\" indentation");
             }
             else {
                 style.tabWidth = space[0].length;
+                console.log(`Detected ${style.tabWidth} spaces indentation`);
             }
         }
     }
@@ -41,5 +40,6 @@ export const detectJsonStyle = (jsonString: string): prettier.Options => {
         }
     }
 
+    console.log(`Detected "${style.endOfLine}" EOL`);
     return style;
 };

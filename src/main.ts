@@ -18,7 +18,6 @@ export const main = async () => {
                     describe: "file to fix"
                 });
         }, (argv) => {
-            console.log(JSON.stringify(argv, null, 2));
         })
         .option("config", {
             alias: "c",
@@ -29,8 +28,7 @@ export const main = async () => {
 
     // Read config
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
-    console.log(JSON.stringify({ config }, null, 2));
-    
+
     let lockFilesLocations =[];
     if (cliParams.file) {
         lockFilesLocations = [cliParams.config];
@@ -43,13 +41,14 @@ export const main = async () => {
     }
 
     for (const lockFile of lockFilesLocations) {
-        console.log(`Calling await fixLockFile("${lockFile}");`);
+        console.log(`Started handling ${lockFile}`);
         try {
             await fixLockFile(lockFile);
         }
         catch (e) {
             // do nothing
         }
+        console.log(`Finished handling ${lockFile}`);
     }
 };
 
