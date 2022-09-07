@@ -24,7 +24,8 @@
         "pretsc": "rimraf dist",
         "tsc": "tsc --build tsconfig.build.json",
         "add-shebang": "add-shebang",
-        "start": "ts-node src/index.ts",
+        "prestart": "npm run tsc",
+        "start": "node ./dist/index.js",
         "start:help": "npm run start -- --help",
         "package": "npm pack",
         "pre-commit": "lint-staged"
