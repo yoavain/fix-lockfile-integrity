@@ -40,7 +40,7 @@ const getIntegrity = async (packageName: string, packageVersion: string, oldInte
 
 
 export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
-    let dirty: boolean = false;
+    let dirtyCount: number = 0;
 
     // Read lock file
     let jsonString: string;
@@ -92,18 +92,18 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
     const fixedLockFile = traverse(lockFile).map(function(node) {
         if (node && node.version && node.integrity && integrityPairsMap[node.integrity]) {
             node.integrity = integrityPairsMap[node.integrity];
-            dirty = true;
+            ++dirtyCount;
         }
     });
 
-    if (dirty) {
+    if (dirtyCount) {
         let lockFileString: string = JSON.stringify(fixedLockFile);
         if (prettierInitialConfig) {
             lockFileString = prettier.format(lockFileString, { ...prettierInitialConfig, ...jsonStyleOptions });
         }
 
         fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
-        logger.info("Overwriting lock file");
+        logger.info(`Overwriting lock file with ${dirtyCount} integrity fixes`);
     }
     else {
         logger.info("No change needed for lock file");
