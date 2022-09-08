@@ -48,7 +48,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         jsonString = fs.readFileSync(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn(`${lockFileLocation} does not exist`);
+        logger.warn("Lock file does not exist");
         return;
     }
 

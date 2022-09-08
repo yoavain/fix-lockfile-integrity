@@ -57,17 +57,19 @@ export const main = async () => {
         });
     }
 
-    logger.info(`Handling ${lockFilesLocations.length} file${lockFilesLocations.length > 1 ? "s" : ""}`);
     for (let i = 0; i < lockFilesLocations.length; i++) {
         const lockFile = lockFilesLocations[i];
-        logger.info(`Started handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
+        logger.info(`Started handling ${lockFile}`);
         try {
             await fixLockFile(lockFile);
         }
         catch (e) {
             // do nothing
         }
-        logger.info(`Finished handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
+        logger.info(`Finished handling ${lockFile}`);
+        if (i < lockFilesLocations.length - 1) {
+            logger.info("-------------------------------------------------------------------------");
+        }
     }
 };
 
