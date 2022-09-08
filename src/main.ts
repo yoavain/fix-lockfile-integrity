@@ -13,10 +13,11 @@ type Command = {
 
 export const main = async () => {
     const cliParams = await yargs(hideBin(process.argv))
+        .scriptName("fix-lockfile-integrity")
         .command<Command>("* [file]", "fix file", (yargs) => {
             return yargs
                 .positional("file", {
-                    describe: "file to fix"
+                    describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder"
                 });
         }, (argv) => {
         })
@@ -26,20 +27,23 @@ export const main = async () => {
             description: "configuration file"
         })
         .option("verbose", {
+            alias: "v",
             type: "boolean",
-            description: "verbose"
+            description: "verbose logging"
         })
         .option("quiet", {
             alias: "q",
             type: "boolean",
-            description: "quiet"
+            description: "quiet (suppresses verbose too)"
         })
+        .help("h")
+        .alias("h", "help")
         .parse();
 
     if (cliParams.quiet) {
         setQuiet();
     }
-    if (cliParams.verbose) {
+    else if (cliParams.verbose) {
         setVerbose();
     }
 
