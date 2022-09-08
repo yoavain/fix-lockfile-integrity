@@ -6,18 +6,19 @@ import path from "path";
 import type { FixLockFileIntegrityConfig } from "./types";
 import { defaultFixLockFileIntegrityConfig, defaultPrettierOptions } from "./consts";
 import { logger } from "./logger";
+import chalk from "chalk";
 
 const MODULE_NAME = "fix-lockfile";
 
 const customDefaultLoader = (ext: string): LoaderSync => {
     return (filepath: string, content: string) => {
-        logger.verbose("Reading configuration from " + filepath);
+        logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
         return () => defaultLoaders[ext](filepath, content);
     }; 
 };
 
 const customTsLoader: LoaderSync = (filepath: string, content: string) => {
-    logger.verbose("Reading configuration from " + filepath);
+    logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
     return () => TypeScriptLoader()(filepath, content);
 };
 
@@ -45,7 +46,7 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
     let cosmiconfigResult: CosmiconfigResult;
     if (overrideConfigPath) {
         cosmiconfigResult = await explorer.load(overrideConfigPath);
-        logger.verbose(`Read configuration from ${cosmiconfigResult}`);
+        logger.verbose(`Read configuration from ${chalk.magenta(cosmiconfigResult)}`);
     }
     else {
         logger.verbose("Searching for configuration");

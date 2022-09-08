@@ -1,10 +1,12 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import type { FixLockFileIntegrityConfig } from "./types";
+import type { FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
+import { isError } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./lockfix";
-import path from "path";
 import { logger, setQuiet, setVerbose } from "./logger";
+import chalk from "chalk";
+import path from "path";
 
 type Command = {
     file: string
@@ -50,32 +52,57 @@ export const main = async () => {
     // Read config
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
 
-    let lockFilesLocations =[];
+    let explicitFilesLocations =[]; // must work
+    let lookupPaths = []; // requires at least one file to work
     if (cliParams.file) {
-        lockFilesLocations = [cliParams.config];
+        explicitFilesLocations = [cliParams.config];
     }
     else {
-        config.includeFiles?.forEach((file: string) => lockFilesLocations.push(file));
-        config.includePaths?.forEach((includedPath: string) => {
-            config.lockFileNames?.forEach((filename: string) => lockFilesLocations.push(path.resolve(includedPath, filename)));
-        });
+        config.includeFiles?.forEach((file: string) => explicitFilesLocations.push(file));
+        config.includePaths?.forEach((includedPath: string) => lookupPaths.push(includedPath));
     }
 
-    for (let i = 0; i < lockFilesLocations.length; i++) {
-        const lockFile = lockFilesLocations[i];
-        logger.info(`Started handling ${lockFile}`);
-        try {
-            await fixLockFile(lockFile);
+    // Handle explicit files (throw on error)
+    let lockFileIndex = 0;
+    for (const lockFile of explicitFilesLocations) {
+        ++lockFileIndex;
+        logger.verbose(`Started handling ${chalk.blue(lockFile)}`);
+        const fixLockFileResult: FixLockFileResult = await fixLockFile(lockFile);
+        logger.verbose(`Finished handling ${chalk.blue(lockFile)}`);
+        if (isError(fixLockFileResult)) {
+            throw new Error(fixLockFileResult);
         }
-        catch (e) {
-            // do nothing
+
+        if (lockFileIndex < explicitFilesLocations.length - 1 || lookupPaths.length > 0) {
+            logger.verbose(chalk.cyan("-------------------------------------------------------------------------"));
         }
-        logger.info(`Finished handling ${lockFile}`);
-        if (i < lockFilesLocations.length - 1) {
-            logger.info("-------------------------------------------------------------------------");
+    }
+    
+    // Handle lookup paths (throw if all file in path return an error)
+    let lookupPathCounter = 0;
+    for (const lookupPath of lookupPaths) {
+        let anyFileHandled: boolean = false;
+        for (const lockFileName of config.lockFileNames) {
+            ++lookupPathCounter;
+            const lockFile: string = path.resolve(lookupPath, lockFileName);
+            logger.verbose(`Started handling ${chalk.blue(lockFile)}`);
+            const fixLockFileResult: FixLockFileResult = await fixLockFile(lockFile);
+            logger.verbose(`Finished handling ${chalk.blue(lockFile)}`);
+            if (!isError(fixLockFileResult)) {
+                anyFileHandled = true;
+            }
+            if (lookupPathCounter < lookupPaths.length * config.lockFileNames.length) {
+                logger.verbose(chalk.cyan("-------------------------------------------------------------------------"));
+            }
+        }
+        if (!anyFileHandled) {
+            throw new Error(`Failed to handle any lock file in ${lookupPath}`);
         }
     }
 };
 
 // Run main
-main().catch(console.error);
+main().catch((message: string) => {
+    console.error(chalk.red(message));
+    process.exit(1);
+});

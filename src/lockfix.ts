@@ -6,6 +6,8 @@ import fs from "fs";
 import * as prettier from "prettier";
 import { detectJsonStyle } from "./jsonUtils";
 import { logger } from "./logger";
+import chalk from "chalk";
+import { FixLockFileResult } from "./types";
 
 const MAX_CONCURRENT_PROMISES = 4;
 
@@ -38,8 +40,7 @@ const getIntegrity = async (packageName: string, packageVersion: string, oldInte
     return { oldIntegrity, newIntegrity };
 };
 
-
-export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
+export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
     let dirtyCount: number = 0;
 
     // Read lock file
@@ -48,13 +49,13 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         jsonString = fs.readFileSync(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn("Lock file does not exist");
-        return;
+        logger.warn(`Lock file ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
+        return FixLockFileResult.FILE_NOT_FOUND_ERROR;
     }
 
     if (typeof jsonString !== "string" || jsonString.length === 0) {
-        logger.warn(`${lockFileLocation} is empty`);
-        return;
+        logger.warn(`${chalk.blue(lockFileLocation)} is empty`);
+        return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
     // Identify indentation and EOL
@@ -66,7 +67,8 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         lockFile = JSON.parse(jsonString);
     }
     catch (e) {
-        logger.warn("Cannot parse JSON");
+        logger.warn(chalk.red("Cannot parse JSON"));
+        return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
     // Collect
@@ -102,10 +104,18 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
             lockFileString = prettier.format(lockFileString, { ...prettierInitialConfig, ...jsonStyleOptions });
         }
 
-        fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
-        logger.info(`Overwriting lock file with ${dirtyCount} integrity fixes`);
+        try {
+            fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
+        }
+        catch (e) {
+            logger.error(`Unable to write lock file ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);
+            return FixLockFileResult.FILE_WRITE_ERROR;
+        }
+        logger.info(`Overwriting lock file ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
+        return FixLockFileResult.FILE_FIXED;
     }
     else {
-        logger.info("No change needed for lock file");
+        logger.info(`No change needed for lock file ${chalk.blue(lockFileLocation)}`);
+        return FixLockFileResult.FILE_NOT_CHANGED;
     }
 };
