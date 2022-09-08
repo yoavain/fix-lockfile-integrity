@@ -5,6 +5,7 @@ import got from "got";
 import fs from "fs";
 import * as prettier from "prettier";
 import { detectJsonStyle } from "./jsonUtils";
+import { logger } from "./logger";
 
 const MAX_CONCURRENT_PROMISES = 4;
 
@@ -47,12 +48,12 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         jsonString = fs.readFileSync(lockFileLocation, "utf8");
     }
     catch (e) {
-        console.warn(`${lockFileLocation} does not exist`);
+        logger.warn(`${lockFileLocation} does not exist`);
         return;
     }
 
     if (typeof jsonString !== "string" || jsonString.length === 0) {
-        console.warn(`${lockFileLocation} is empty`);
+        logger.warn(`${lockFileLocation} is empty`);
         return;
     }
 
@@ -65,7 +66,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         lockFile = JSON.parse(jsonString);
     }
     catch (e) {
-        console.warn("Cannot parse JSON");
+        logger.warn("Cannot parse JSON");
     }
 
     // Collect
@@ -102,9 +103,9 @@ export const fixLockFile = async (lockFileLocation: string): Promise<void> => {
         }
 
         fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
-        console.log("Overwriting lock file");
+        logger.info("Overwriting lock file");
     }
     else {
-        console.log("No change needed for lock file");
+        logger.info("No change needed for lock file");
     }
 };

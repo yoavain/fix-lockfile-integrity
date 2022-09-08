@@ -1,11 +1,25 @@
-import { cosmiconfig } from "cosmiconfig";
+import type { LoaderSync } from "cosmiconfig";
+import { cosmiconfig, defaultLoaders } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
 import path from "path";
 import type { FixLockFileIntegrityConfig } from "./types";
 import { defaultFixLockFileIntegrityConfig, defaultPrettierOptions } from "./consts";
+import { logger } from "./logger";
 
 const MODULE_NAME = "fix-lockfile";
+
+const customDefaultLoader = (ext: string): LoaderSync => {
+    return (filepath: string, content: string) => {
+        logger.verbose("Reading configuration from " + filepath);
+        return () => defaultLoaders[ext](filepath, content);
+    }; 
+};
+
+const customTsLoader: LoaderSync = (filepath: string, content: string) => {
+    logger.verbose("Reading configuration from " + filepath);
+    return () => TypeScriptLoader()(filepath, content);
+};
 
 const explorer = cosmiconfig(MODULE_NAME, {
     searchPlaces: [
@@ -19,12 +33,27 @@ const explorer = cosmiconfig(MODULE_NAME, {
         `${MODULE_NAME}.config.ts`
     ],
     loaders: {
-        ".ts": TypeScriptLoader()
+        ".js": customDefaultLoader(".js"),
+        ".json": customDefaultLoader(".json"),
+        ".yaml": customDefaultLoader(".yaml"),
+        ".yml": customDefaultLoader(".yml"),
+        ".ts": customTsLoader
     }
 });
 
 export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFileIntegrityConfig> => {
-    const cosmiconfigResult: CosmiconfigResult = overrideConfigPath ? await explorer.load(overrideConfigPath) : await explorer.search(path.resolve(__dirname, ".."));
+    let cosmiconfigResult: CosmiconfigResult;
+    if (overrideConfigPath) {
+        cosmiconfigResult = await explorer.load(overrideConfigPath);
+        logger.verbose(`Read configuration from ${cosmiconfigResult}`);
+    }
+    else {
+        logger.verbose("Searching for configuration");
+        cosmiconfigResult = await explorer.search(path.resolve(__dirname, ".."));
+        if (cosmiconfigResult) {
+            logger.verbose("Configuration read");
+        }
+    }
     const prettierConfig = { ...defaultPrettierOptions, ...(cosmiconfigResult?.config as FixLockFileIntegrityConfig)?.prettier };
     return { ...defaultFixLockFileIntegrityConfig, ...cosmiconfigResult?.config as FixLockFileIntegrityConfig, prettier: prettierConfig };
 };

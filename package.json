@@ -25,7 +25,8 @@
         "tsc": "tsc --build tsconfig.build.json",
         "add-shebang": "add-shebang",
         "prestart": "npm run tsc",
-        "start": "node ./dist/index.js",
+        "start": "node ./dist/main.js",
+        "start:debug": "node --inspect-brk ./dist/main.js",
         "start:help": "npm run start -- --help",
         "package": "npm pack",
         "pre-commit": "lint-staged"

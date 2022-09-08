@@ -4,6 +4,7 @@ import type { FixLockFileIntegrityConfig } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./lockfix";
 import path from "path";
+import { logger, setQuiet, setVerbose } from "./logger";
 
 type Command = {
     file: string
@@ -24,7 +25,23 @@ export const main = async () => {
             type: "string",
             description: "configuration file"
         })
+        .option("verbose", {
+            type: "boolean",
+            description: "verbose"
+        })
+        .option("quiet", {
+            alias: "q",
+            type: "boolean",
+            description: "quiet"
+        })
         .parse();
+
+    if (cliParams.quiet) {
+        setQuiet();
+    }
+    if (cliParams.verbose) {
+        setVerbose();
+    }
 
     // Read config
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
@@ -40,17 +57,17 @@ export const main = async () => {
         });
     }
 
-    console.log(`Handling ${lockFilesLocations.length} file${lockFilesLocations.length > 1 ? "s" : ""}`);
+    logger.info(`Handling ${lockFilesLocations.length} file${lockFilesLocations.length > 1 ? "s" : ""}`);
     for (let i = 0; i < lockFilesLocations.length; i++) {
         const lockFile = lockFilesLocations[i];
-        console.log(`Started handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
+        logger.info(`Started handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
         try {
             await fixLockFile(lockFile);
         }
         catch (e) {
             // do nothing
         }
-        console.log(`Finished handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
+        logger.info(`Finished handling ${lockFile} [${i+1}/${lockFilesLocations.length}]`);
     }
 };
 

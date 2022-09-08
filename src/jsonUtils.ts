@@ -1,4 +1,5 @@
 import type * as prettier from "prettier";
+import { logger } from "./logger";
 
 const DEFAULT_INDENT_OPTIONS: prettier.Options = {
     tabWidth: 2,
@@ -17,11 +18,11 @@ export const detectJsonStyle = (jsonString: string): prettier.Options => {
             if (space[0] === "\t") {
                 style.useTabs = true;
                 delete style.tabWidth;
-                console.log("Detected \"Tab\" indentation");
+                logger.verbose("Detected \"Tab\" indentation");
             }
             else {
                 style.tabWidth = space[0].length;
-                console.log(`Detected ${style.tabWidth} spaces indentation`);
+                logger.verbose(`Detected ${style.tabWidth} spaces indentation`);
             }
         }
     }
@@ -40,6 +41,6 @@ export const detectJsonStyle = (jsonString: string): prettier.Options => {
         }
     }
 
-    console.log(`Detected "${style.endOfLine}" EOL`);
+    logger.verbose(`Detected "${style.endOfLine}" EOL`);
     return style;
 };
