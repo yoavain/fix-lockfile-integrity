@@ -37,6 +37,8 @@
         "url": "git+https://github.com/yoavain/fix-lockfile-integrity.git"
     },
     "keywords": [
+        "security",
+        "lock",
         "lockfile",
         "package-lock.json",
         "npm-shrinkwrap.json",
