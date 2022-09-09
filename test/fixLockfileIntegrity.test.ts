@@ -38,8 +38,7 @@ const LOCKFILE_V2_SCOPED_PACKAGE = {
 describe("Test fix lockfile integrity", () => {
     beforeEach(() => {
         jest.spyOn(got, "get").mockResolvedValue({ body: { versions: { "1.0.0": { dist: { integrity: SHA512 } } } } });
-        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
-        
+
         jest.spyOn(console, "info").mockImplementation(() => {});
         jest.spyOn(console, "error").mockImplementation(() => {});
         jest.spyOn(console, "warn").mockImplementation(() => {});
@@ -74,10 +73,23 @@ describe("Test fix lockfile integrity", () => {
 
         expect(result).toEqual(FixLockFileResult.FILE_PARSE_ERROR);
     });
-    
+
+    it("Test fixLockFile - file write error", async () => {
+        const jsonString = JSON.stringify(LOCKFILE_V1_SIMPLE_PACKAGE, null, 2) + "\n";
+        jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {
+            throw new Error("File write error");
+        });
+
+        const result: FixLockFileResult = await fixLockFile("fileLocation");
+
+        expect(result).toEqual(FixLockFileResult.FILE_WRITE_ERROR);
+    });
+
     it("Should handle lock file version 1 - simple package", async () => {
         const jsonString = JSON.stringify(LOCKFILE_V1_SIMPLE_PACKAGE, null, 2) + "\n";
         jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
@@ -89,6 +101,7 @@ describe("Test fix lockfile integrity", () => {
     it("Should handle lock file version 1 - scoped package", async () => {
         const jsonString = JSON.stringify(LOCKFILE_V1_SCOPED_PACKAGE, null, 2) + "\n";
         jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
@@ -100,6 +113,7 @@ describe("Test fix lockfile integrity", () => {
     it("Should handle lock file version 2 - simple package", async () => {
         const jsonString = JSON.stringify(LOCKFILE_V2_SIMPLE_PACKAGE, null, 2) + "\n";
         jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
@@ -111,11 +125,21 @@ describe("Test fix lockfile integrity", () => {
     it("Should handle lock file version 2 - scoped package", async () => {
         const jsonString = JSON.stringify(LOCKFILE_V2_SCOPED_PACKAGE, null, 2) + "\n";
         jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
         const expectedJsonString = jsonString.replace(SHA1, SHA512);
         expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
+    });
+
+    it("Should not change lock file when not needed", async () => {
+        const jsonString = JSON.stringify(LOCKFILE_V1_SIMPLE_PACKAGE, null, 2).replace(SHA1, SHA512) + "\n";
+        jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+
+        const result: FixLockFileResult = await fixLockFile("fileLocation");
+
+        expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
     });
 });
