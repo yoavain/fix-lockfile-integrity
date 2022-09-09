@@ -22,7 +22,7 @@ export const main = async () => {
     let explicitFilesLocations =[]; // must work
     let lookupPaths = []; // requires at least one file to work
     if (cliParams.file) {
-        explicitFilesLocations = [cliParams.config];
+        explicitFilesLocations = [cliParams.file];
     }
     else {
         config.includeFiles?.forEach((file: string) => explicitFilesLocations.push(file));
@@ -38,10 +38,6 @@ export const main = async () => {
         logger.verbose(`Finished handling ${chalk.blue(lockFile)}`);
         if (isError(fixLockFileResult)) {
             throw new Error(fixLockFileResult);
-        }
-
-        if (lockFileIndex < explicitFilesLocations.length - 1 || lookupPaths.length > 0) {
-            logger.verbose(chalk.cyan("-------------------------------------------------------------------------"));
         }
     }
     
