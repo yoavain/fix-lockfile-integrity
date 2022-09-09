@@ -13,6 +13,7 @@
 ![Downloads](https://img.shields.io/npm/dm/fix-lockfile-integrity.svg)
 
 
+
 If something doesn't work, please [file an issue](https://github.com/yoavain/fix-lockfile-integrity/issues/new). 
 
 ## Quick Overview
