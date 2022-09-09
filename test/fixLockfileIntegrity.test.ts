@@ -12,7 +12,10 @@ const LOCKFILE_V1_SIMPLE_PACKAGE = {
         integrity: SHA1,
         engines: {
             node: "^14.15.0 || >=16.0.0"
-        }
+        },
+        os: [
+            "darwin"
+        ]
     }
 };
 const LOCKFILE_V1_SCOPED_PACKAGE = {

@@ -14,7 +14,8 @@ const MODE_MODULES_PREFIX = "node_modules/";
 
 // Prettier config
 const prettierInitialConfig: prettier.Options = {
-    parser: "json"
+    parser: "json",
+    printWidth: 0 // to always have new lines
 };
 
 const REGISTRY = "https://registry.npmjs.org";
