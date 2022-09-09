@@ -50,7 +50,7 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
     }
     else {
         logger.verbose("Searching for configuration");
-        cosmiconfigResult = await explorer.search(path.resolve(__dirname, ".."));
+        cosmiconfigResult = await explorer.search(path.resolve("./"));
     }
     if (cosmiconfigResult?.config) {
         logger.verbose(`Configuration read:\n${chalk.magentaBright(JSON.stringify(cosmiconfigResult.config, null, 2))}`);
