@@ -85,7 +85,7 @@ Alternatively, you can specify configuration file to load via CLI `--config` (al
 `.fix-lockfile.ts` or ` fix-lockfile.config.ts`
 
 ```ts
-import type { FixLockFileIntegrityConfig } from "../../src";
+import type { FixLockFileIntegrityConfig } from "fix-lockfile-integrity";
 
 const config: FixLockFileIntegrityConfig = {
     includePaths: ["./", "./packages/a", "./packages/b"],
