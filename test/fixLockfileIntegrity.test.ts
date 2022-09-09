@@ -9,7 +9,10 @@ const LOCKFILE_V1_SIMPLE_PACKAGE = {
     packageName: {
         version: "1.0.0",
         resolved: "https://registry.npmjs.org/packageName/-/packageName-1.0.0.tgz",
-        integrity: SHA1
+        integrity: SHA1,
+        engines: {
+            node: "^14.15.0 || >=16.0.0"
+        }
     }
 };
 const LOCKFILE_V1_SCOPED_PACKAGE = {

@@ -105,12 +105,8 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     });
 
     if (dirtyCount) {
-        let lockFileString: string = JSON.stringify(fixedLockFile);
-        if (prettierInitialConfig) {
-            lockFileString = prettier.format(lockFileString, { ...prettierInitialConfig, ...jsonStyleOptions });
-        }
-
         try {
+            const lockFileString: string = prettier.format(JSON.stringify(fixedLockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
             fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
