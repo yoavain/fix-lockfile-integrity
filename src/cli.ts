@@ -5,7 +5,7 @@ import type { ClioOptions } from "./types";
 export const parseCliOptions = async (): Promise<ClioOptions> => {
     return yargs(hideBin(process.argv))
         .scriptName("fix-lockfile-integrity")
-        .command<ClioOptions>("* [file]", "fix file", (yargs) => {
+        .command<ClioOptions>("* [file]", "Fix lock file integrity", (yargs) => {
             return yargs
                 .positional("file", {
                     describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder"

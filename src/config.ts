@@ -30,6 +30,8 @@ const explorer = cosmiconfig(MODULE_NAME, {
         `.${MODULE_NAME}.js`,
         `.${MODULE_NAME}.ts`,
         `${MODULE_NAME}.config.json`,
+        `${MODULE_NAME}.config.yaml`,
+        `${MODULE_NAME}.config.yml`,
         `${MODULE_NAME}.config.js`,
         `${MODULE_NAME}.config.ts`
     ],

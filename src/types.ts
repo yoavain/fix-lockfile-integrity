@@ -8,10 +8,10 @@ export type ClioOptions = {
 }
 
 export type FixLockFileIntegrityConfig = {
-    prettier?: prettier.Options
+    includeFiles?: Array<string>
     includePaths?: Array<string>
     lockFileNames?: Array<string>
-    includeFiles?: Array<string>
+    prettier?: prettier.Options
 }
 
 export enum FixLockFileResult {
