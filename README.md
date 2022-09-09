@@ -15,7 +15,7 @@
 **Fix `sha1` integrity in lock files back to `sha512`**
 
 ## Features
-- Reverts all `sha1` back to `sha512` which is more secure.
+- Reverts all `sha1` back to `sha512` which is more secure
 - Works with both package-lock.json and npm-shrinkwrap.json
 - Works with lockfile version 1 & 2
 - Can be configured to work on multiple paths to support monorepo 
