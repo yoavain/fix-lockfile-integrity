@@ -12,10 +12,10 @@
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.fix-lockfile-integrity)
 ![Downloads](https://img.shields.io/npm/dm/fix-lockfile-integrity.svg)
 
-**Fix sha1 integrity in lock files back to sha512**
+**Fix `sha1` integrity in lock files back to `sha512`**
 
 ## Features
-- Reverts all sha1 back to sha512 which is more secure.
+- Reverts all `sha1` back to `sha512` which is more secure.
 - Works with both package-lock.json and npm-shrinkwrap.json
 - Works with lockfile version 1 & 2
 - Can be configured to work on multiple paths to support monorepo 
@@ -42,7 +42,7 @@ npx fix-lockfile-integrity
 
 ## Usage
 
-Check local folder for a lockfile (package-lock.json or npm-shrinkwrap.json) and fix any sha1 in it
+Check local folder for a lockfile (package-lock.json or npm-shrinkwrap.json) and fix any `sha1` in it
 
 ```sh
 $ fix-lockfile
