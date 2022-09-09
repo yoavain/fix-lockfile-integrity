@@ -32,13 +32,17 @@ export const main = async () => {
     // Handle explicit files (throw on error)
     let lockFileIndex = 0;
     for (const lockFile of explicitFilesLocations) {
-        ++lockFileIndex;
         logger.verbose(`Started handling ${chalk.blue(lockFile)}`);
         const fixLockFileResult: FixLockFileResult = await fixLockFile(lockFile);
         logger.verbose(`Finished handling ${chalk.blue(lockFile)}`);
         if (isError(fixLockFileResult)) {
             throw new Error(fixLockFileResult);
         }
+
+        if (lockFileIndex < explicitFilesLocations.length - 1 || lookupPaths.length > 0) {
+            logger.verbose(chalk.cyan("-------------------------------------------------------------------------"));
+        }
+        ++lockFileIndex;
     }
     
     // Handle lookup paths (throw if all file in path return an error)
@@ -46,7 +50,6 @@ export const main = async () => {
     for (const lookupPath of lookupPaths) {
         let anyFileHandled: boolean = false;
         for (const lockFileName of config.lockFileNames) {
-            ++lookupPathCounter;
             const lockFile: string = path.resolve(lookupPath, lockFileName);
             logger.verbose(`Started handling ${chalk.blue(lockFile)}`);
             const fixLockFileResult: FixLockFileResult = await fixLockFile(lockFile);
@@ -54,9 +57,10 @@ export const main = async () => {
             if (!isError(fixLockFileResult)) {
                 anyFileHandled = true;
             }
-            if (lookupPathCounter < lookupPaths.length * config.lockFileNames.length) {
+            if (lookupPathCounter < lookupPaths.length * config.lockFileNames.length - 1) {
                 logger.verbose(chalk.cyan("-------------------------------------------------------------------------"));
             }
+            ++lookupPathCounter;
         }
         if (!anyFileHandled) {
             throw new Error(`Failed to handle any lock file in ${lookupPath}`);
