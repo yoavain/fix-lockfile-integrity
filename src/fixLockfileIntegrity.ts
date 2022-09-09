@@ -10,6 +10,7 @@ import chalk from "chalk";
 import { FixLockFileResult } from "./types";
 
 const MAX_CONCURRENT_PROMISES = 4;
+const MODE_MODULES_PREFIX = "node_modules/";
 
 // Prettier config
 const prettierInitialConfig: prettier.Options = {
@@ -38,6 +39,11 @@ const getIntegrity = async (packageName: string, packageVersion: string, oldInte
     const newIntegrity: string = metadata?.body?.versions?.[packageVersion]?.dist?.integrity;
 
     return { oldIntegrity, newIntegrity };
+};
+
+const parsePackageName = (key: string): string => {
+    const index: number = key.lastIndexOf(MODE_MODULES_PREFIX);
+    return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
@@ -76,7 +82,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let promises: Array<Promise<IntegrityPair>> = [];
     traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.resolved?.startsWith(REGISTRY) && node.integrity?.startsWith("sha1-")) {
-            const packageName = this.key;
+            const packageName = parsePackageName(this.key);
             const packageVersion = node.version;
             const oldIntegrity = node.integrity;
 
