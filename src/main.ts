@@ -3,7 +3,7 @@ import { hideBin } from "yargs/helpers";
 import type { FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
 import { isError } from "./types";
 import { getConfig } from "./config";
-import { fixLockFile } from "./lockfix";
+import { fixLockFile } from "./fixLockfileIntegrity";
 import { logger, setQuiet, setVerbose } from "./logger";
 import chalk from "chalk";
 import path from "path";
