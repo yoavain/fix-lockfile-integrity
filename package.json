@@ -5,7 +5,8 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "fix-lockfile": "./dist/run.js"
+        "fix-lockfile": "./dist/run.js",
+        "fix-lockfile-integrity": "./dist/run.js"
     },
     "scripts": {
         "prepare": "git config --get core.hookspath || husky install",

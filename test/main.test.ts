@@ -1,6 +1,7 @@
 import * as cli from "../src/cli";
 import * as fixLockfileIntegrity from "../src/fixLockfileIntegrity";
 import { FixLockFileResult, main } from "../src";
+import * as config from "../src/config";
 
 describe("Test main logic", () => {
     afterEach(() => {
@@ -19,6 +20,23 @@ describe("Test main logic", () => {
         await main();
 
         expect(fixLockfileIntegrity.fixLockFile).toHaveBeenCalledWith("explicitFile");
+    });
+
+    it("Test multiple explicit files via config", async () => {
+        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+            file: undefined,
+            config: undefined,
+            quiet: true,
+            verbose: false
+        });
+        jest.spyOn(config, "getConfig").mockResolvedValue({
+            includeFiles: ["explicitFile1", "explicitFile2"]
+        });
+        jest.spyOn(fixLockfileIntegrity, "fixLockFile").mockImplementation(async () => FixLockFileResult.FILE_NOT_CHANGED);
+
+        await main();
+
+        expect(fixLockfileIntegrity.fixLockFile).toHaveBeenCalledTimes(2);
     });
 
     it("Test explicit file flow - error", async () => {
