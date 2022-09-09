@@ -1,11 +1,11 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import type { Command } from "./types";
+import type { ClioOptions } from "./types";
 
-export const parseCliOptions = async (): Promise<Command> => {
+export const parseCliOptions = async (): Promise<ClioOptions> => {
     return yargs(hideBin(process.argv))
         .scriptName("fix-lockfile-integrity")
-        .command<Command>("* [file]", "fix file", (yargs) => {
+        .command<ClioOptions>("* [file]", "fix file", (yargs) => {
             return yargs
                 .positional("file", {
                     describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder"

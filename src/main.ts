@@ -1,4 +1,4 @@
-import type { Command, FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
+import type { ClioOptions, FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
 import { isError } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./fixLockfileIntegrity";
@@ -8,7 +8,7 @@ import path from "path";
 import { parseCliOptions } from "./cli";
 
 export const main = async () => {
-    const cliParams: Command = await parseCliOptions();
+    const cliParams: ClioOptions = await parseCliOptions();
     if (cliParams.quiet) {
         setQuiet();
     }

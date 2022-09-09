@@ -1,6 +1,6 @@
 import type * as prettier from "prettier";
 
-export type Command = {
+export type ClioOptions = {
     file: string
     config: string
     quiet: boolean
