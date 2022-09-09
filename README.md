@@ -1,7 +1,5 @@
 ![](https://raw.githubusercontent.com/yoavain/fix-lockfile-integrity/main/resources/docs/logo.gif)
 # Fix Lockfile Intgrity 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/context:javascript)
 [![Actions Status](https://github.com/yoavain/fix-lockfile-integrity/workflows/Node%20CI/badge.svg)](https://github.com/yoavain/fix-lockfile-integrity/actions)
 ![node](https://img.shields.io/node/v/fix-lockfile-integrity.svg)
 ![types](https://img.shields.io/npm/types/typescript.svg)
