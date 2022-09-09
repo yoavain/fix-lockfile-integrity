@@ -1,5 +1,12 @@
 import type * as prettier from "prettier";
 
+export type Command = {
+    file: string
+    config: string
+    quiet: boolean
+    verbose: boolean
+}
+
 export type FixLockFileIntegrityConfig = {
     prettier?: prettier.Options
     includePaths?: Array<string>

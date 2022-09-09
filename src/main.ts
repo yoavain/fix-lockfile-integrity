@@ -1,47 +1,14 @@
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import type { FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
+import type { Command, FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
 import { isError } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./fixLockfileIntegrity";
 import { logger, setQuiet, setVerbose } from "./logger";
 import chalk from "chalk";
 import path from "path";
-
-type Command = {
-    file: string
-    config: string
-}
+import { parseCliOptions } from "./cli";
 
 export const main = async () => {
-    const cliParams = await yargs(hideBin(process.argv))
-        .scriptName("fix-lockfile-integrity")
-        .command<Command>("* [file]", "fix file", (yargs) => {
-            return yargs
-                .positional("file", {
-                    describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder"
-                });
-        }, (argv) => {
-        })
-        .option("config", {
-            alias: "c",
-            type: "string",
-            description: "configuration file"
-        })
-        .option("verbose", {
-            alias: "v",
-            type: "boolean",
-            description: "verbose logging"
-        })
-        .option("quiet", {
-            alias: "q",
-            type: "boolean",
-            description: "quiet (suppresses verbose too)"
-        })
-        .help("h")
-        .alias("h", "help")
-        .parse();
-
+    const cliParams: Command = await parseCliOptions();
     if (cliParams.quiet) {
         setQuiet();
     }
