@@ -173,7 +173,7 @@ Using husky (or alike) to run as a pre-commit hook
 
 ## Why?
 
-NPM has known issue of constantly changing integity property of its lock file. Integrity may change due to plenty of reasons. Some of them are:
+NPM has known issue of constantly changing integrity property of its lock file. Integrity may change due to plenty of reasons. Some of them are:
 
 1. npm install done on machine with different OS from one where lock file generated
 2. some package version updated
