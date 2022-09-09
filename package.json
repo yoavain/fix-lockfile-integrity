@@ -20,7 +20,7 @@
         "jest": "cross-env FORCE_COLOR=0 jest",
         "jest:unit": "cross-env FORCE_COLOR=0 jest ./test/",
         "jest:integration": "cross-env FORCE_COLOR=0 jest ./integration_test/",
-        "prettier": "prettier --write *.json templates/**/*.json",
+        "prettier": "prettier --write *.json",
         "pretsc": "rimraf dist",
         "tsc": "tsc --build tsconfig.build.json",
         "add-shebang": "add-shebang",
