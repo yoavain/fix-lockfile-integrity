@@ -13,13 +13,13 @@ const MODULE_NAME = "fix-lockfile";
 const customDefaultLoader = (ext: string): LoaderSync => {
     return (filepath: string, content: string) => {
         logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
-        return () => defaultLoaders[ext](filepath, content);
+        return defaultLoaders[ext](filepath, content);
     }; 
 };
 
 const customTsLoader: LoaderSync = (filepath: string, content: string) => {
     logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
-    return () => TypeScriptLoader()(filepath, content);
+    return TypeScriptLoader()(filepath, content);
 };
 
 const explorer = cosmiconfig(MODULE_NAME, {
@@ -45,15 +45,15 @@ const explorer = cosmiconfig(MODULE_NAME, {
 export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFileIntegrityConfig> => {
     let cosmiconfigResult: CosmiconfigResult;
     if (overrideConfigPath) {
+        logger.verbose(`Reading configuration from ${chalk.magenta(overrideConfigPath)}`);
         cosmiconfigResult = await explorer.load(overrideConfigPath);
-        logger.verbose(`Read configuration from ${chalk.magenta(cosmiconfigResult)}`);
     }
     else {
         logger.verbose("Searching for configuration");
         cosmiconfigResult = await explorer.search(path.resolve(__dirname, ".."));
-        if (cosmiconfigResult) {
-            logger.verbose("Configuration read");
-        }
+    }
+    if (cosmiconfigResult?.config) {
+        logger.verbose(`Configuration read:\n${chalk.magentaBright(JSON.stringify(cosmiconfigResult.config, null, 2))}`);
     }
     const prettierConfig = { ...defaultPrettierOptions, ...(cosmiconfigResult?.config as FixLockFileIntegrityConfig)?.prettier };
     return { ...defaultFixLockFileIntegrityConfig, ...cosmiconfigResult?.config as FixLockFileIntegrityConfig, prettier: prettierConfig };
