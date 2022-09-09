@@ -83,7 +83,7 @@
         "cosmiconfig": "7.0.1",
         "cosmiconfig-typescript-loader": "4.0.0",
         "got": "11.8.5",
-        "p-limit": "3.1.0",
+        "p-limit": "4.0.0",
         "prettier": "2.7.1",
         "traverse": "0.6.6",
         "yargs": "17.5.1"
