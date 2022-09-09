@@ -1,11 +1,11 @@
 let quiet: boolean = false;
 let verbose: boolean = false;
 
-export const setQuiet = () => {
-    quiet = true;
+export const setQuiet = (value: boolean = true) => {
+    quiet = value;
 };
-export const setVerbose = () => {
-    verbose = true;
+export const setVerbose = (value: boolean = true) => {
+    verbose = value;
 };
 
 export const logger = {
