@@ -1,5 +1,5 @@
 ![](https://raw.githubusercontent.com/yoavain/fix-lockfile-integrity/main/resources/docs/logo.gif)
-# Create Windowless App
+# Fix Lockfile Intgrity 
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/context:javascript)
 [![Actions Status](https://github.com/yoavain/fix-lockfile-integrity/workflows/Node%20CI/badge.svg)](https://github.com/yoavain/fix-lockfile-integrity/actions)
@@ -13,14 +13,6 @@
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.fix-lockfile-integrity)
 ![Downloads](https://img.shields.io/npm/dm/fix-lockfile-integrity.svg)
-
-Fix lockfile integrity
-
-todo
- [ ] Support configuration, with multiple locations. Default __dirname
- [ ] Support prettier / keep indentation/white spaces, etc
- [ ] Support mutliple registies 
-
 
 
 If something doesn't work, please [file an issue](https://github.com/yoavain/fix-lockfile-integrity/issues/new). 
