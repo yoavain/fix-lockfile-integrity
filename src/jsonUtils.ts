@@ -2,14 +2,14 @@ import type * as prettier from "prettier";
 import { logger } from "./logger";
 import chalk from "chalk";
 
-const DEFAULT_INDENT_OPTIONS: prettier.Options = {
+const DEFAULT_INDENT_OPTIONS: prettier.Options = Object.freeze({
     tabWidth: 2,
     useTabs: false,
     endOfLine: "auto"
-};
+});
     
 export const detectJsonStyle = (jsonString: string): prettier.Options => {
-    let style = DEFAULT_INDENT_OPTIONS;
+    let style = { ...DEFAULT_INDENT_OPTIONS };
 
     // Indentation
     if (jsonString !== "{}") {
