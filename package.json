@@ -5,7 +5,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "fix-lockfile-integrity": "./dist/main.js"
+        "fix-lockfile-integrity": "./dist/run.js"
     },
     "scripts": {
         "prepare": "git config --get core.hookspath || husky install",
@@ -25,7 +25,7 @@
         "tsc": "tsc --build tsconfig.build.json",
         "add-shebang": "add-shebang",
         "prestart": "npm run tsc",
-        "start": "node ./dist/main.js",
+        "start": "node ./dist/run.js",
         "start:debug": "node --inspect-brk ./dist/main.js",
         "start:help": "npm run start -- --help",
         "package": "npm pack",

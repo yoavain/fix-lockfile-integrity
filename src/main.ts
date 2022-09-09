@@ -100,9 +100,3 @@ export const main = async () => {
         }
     }
 };
-
-// Run main
-main().catch((message: string) => {
-    console.error(chalk.red(message));
-    process.exit(1);
-});
