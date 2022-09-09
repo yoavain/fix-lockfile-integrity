@@ -49,12 +49,12 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         jsonString = fs.readFileSync(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn(`Lock file ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
+        logger.warn(`${chalk.red("Lock file")} ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
         return FixLockFileResult.FILE_NOT_FOUND_ERROR;
     }
 
     if (typeof jsonString !== "string" || jsonString.length === 0) {
-        logger.warn(`${chalk.blue(lockFileLocation)} is empty`);
+        logger.warn(`${chalk.blue(lockFileLocation)} ${chalk.red("is empty")}`);
         return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
@@ -108,14 +108,14 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
             fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
-            logger.error(`Unable to write lock file ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);
+            logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);
             return FixLockFileResult.FILE_WRITE_ERROR;
         }
-        logger.info(`Overwriting lock file ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
+        logger.info(`${chalk.green("Overwriting lock file")} ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
         return FixLockFileResult.FILE_FIXED;
     }
     else {
-        logger.info(`No change needed for lock file ${chalk.blue(lockFileLocation)}`);
+        logger.info(`${chalk.green("No change needed for lock file")} ${chalk.blue(lockFileLocation)}`);
         return FixLockFileResult.FILE_NOT_CHANGED;
     }
 };
