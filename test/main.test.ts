@@ -26,8 +26,8 @@ describe("Test main logic", () => {
         jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
             file: undefined,
             config: undefined,
-            quiet: true,
-            verbose: false
+            quiet: false,
+            verbose: true
         });
         jest.spyOn(config, "getConfig").mockResolvedValue({
             includeFiles: ["explicitFile1", "explicitFile2"]
@@ -43,7 +43,7 @@ describe("Test main logic", () => {
         jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
             file: "explicitFile",
             config: undefined,
-            quiet: true,
+            quiet: false,
             verbose: false
         });
         jest.spyOn(fixLockfileIntegrity, "fixLockFile").mockImplementation(async () => FixLockFileResult.FILE_NOT_FOUND_ERROR);
@@ -61,7 +61,7 @@ describe("Test main logic", () => {
         jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
             file: undefined,
             config: undefined,
-            quiet: true,
+            quiet: false,
             verbose: false
         });
         jest.spyOn(fixLockfileIntegrity, "fixLockFile").mockImplementation(async () => FixLockFileResult.FILE_NOT_CHANGED);
@@ -75,7 +75,7 @@ describe("Test main logic", () => {
         jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
             file: undefined,
             config: undefined,
-            quiet: true,
+            quiet: false,
             verbose: false
         });
         jest.spyOn(fixLockfileIntegrity, "fixLockFile").mockImplementation(async () => FixLockFileResult.FILE_NOT_FOUND_ERROR);
