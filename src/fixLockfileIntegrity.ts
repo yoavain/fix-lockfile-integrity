@@ -12,6 +12,11 @@ import { FixLockFileResult } from "./types";
 const MAX_CONCURRENT_PROMISES = 4;
 const MODE_MODULES_PREFIX = "node_modules/";
 
+/**
+ * Global cache: old hash -> new hash map
+ */
+const integrityPairsMap: Record<string, string> = {};
+
 // Prettier config
 const prettierInitialConfig: prettier.Options = {
     parser: "json",
@@ -21,12 +26,13 @@ const prettierInitialConfig: prettier.Options = {
 const REGISTRY = "https://registry.npmjs.org";
 type NPMJS_METADATA_PARTIAL = { versions: Array<Record<string, { dist: { integrity: string } }>> }
 
-type IntegrityPair = {
-    oldIntegrity: string
-    newIntegrity: string
-}
-
-const getIntegrity = async (packageName: string, packageVersion: string, oldIntegrity: string): Promise<IntegrityPair | undefined> => {
+/**
+ * Fetches for sha512 integrity for a package version
+ *
+ * @param packageName       package name
+ * @param packageVersion    package version
+ */
+const getIntegrity = async (packageName: string, packageVersion: string): Promise<string> => {
     const url: string = `${REGISTRY}/${packageName}`;
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
@@ -37,9 +43,8 @@ const getIntegrity = async (packageName: string, packageVersion: string, oldInte
     };
     const metadata: GotResponse<NPMJS_METADATA_PARTIAL> = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
 
-    const newIntegrity: string = metadata?.body?.versions?.[packageVersion]?.dist?.integrity;
-
-    return { oldIntegrity, newIntegrity };
+    const integrity: string = metadata?.body?.versions?.[packageVersion]?.dist?.integrity;
+    return integrity?.startsWith("sha512") ? integrity : undefined;
 };
 
 const parsePackageName = (key: string): string => {
@@ -80,22 +85,26 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
 
     // Collect
     const limit = pLimit(MAX_CONCURRENT_PROMISES);
-    let promises: Array<Promise<IntegrityPair>> = [];
+    let promises: Array<Promise<void>> = [];
+    let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.resolved?.startsWith(REGISTRY) && node.integrity?.startsWith("sha1-")) {
             const packageName = parsePackageName(this.key);
             const packageVersion = node.version;
             const oldIntegrity = node.integrity;
 
-            promises.push(limit(() => getIntegrity(packageName, packageVersion, oldIntegrity)));
+            if (!hashesFound.has(oldIntegrity)) {
+                hashesFound.add(oldIntegrity);
+                promises.push(limit(async () => {
+                    const newIntegrity = await getIntegrity(packageName, packageVersion);
+                    if (newIntegrity) {
+                        integrityPairsMap[oldIntegrity] = newIntegrity;
+                    }
+                }));
+            }
         }
     });
-
-    const integrityPairs: Array<IntegrityPair> = await Promise.all(promises);
-    const integrityPairsMap = integrityPairs.reduce((acc, pair) => {
-        acc[pair.oldIntegrity] = pair.newIntegrity;
-        return acc;
-    }, {});
+    await Promise.all(promises);
 
     // Replace
     const fixedLockFile = traverse(lockFile).map(function(node) {
