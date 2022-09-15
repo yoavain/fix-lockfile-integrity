@@ -100,9 +100,9 @@ describe("Test fix lockfile integrity", () => {
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
+        expect(got.get).toHaveBeenCalledTimes(1);
         const expectedJsonString = jsonString.replace(SHA1, SHA512);
         expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
-        expect(got.get).toHaveBeenCalledTimes(1);
     });
 
     it("Should handle lock file version 1 - scoped package", async () => {
@@ -113,9 +113,9 @@ describe("Test fix lockfile integrity", () => {
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
+        expect(got.get).toHaveBeenCalledTimes(1);
         const expectedJsonString = jsonString.replace(SHA1, SHA512);
         expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
-        expect(got.get).toHaveBeenCalledTimes(1);
     });
 
     it("Should handle lock file version 2 - simple package", async () => {
@@ -126,9 +126,9 @@ describe("Test fix lockfile integrity", () => {
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
+        expect(got.get).toHaveBeenCalledTimes(1);
         const expectedJsonString = jsonString.replace(SHA1, SHA512);
         expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
-        expect(got.get).toHaveBeenCalledTimes(1);
     });
 
     it("Should handle lock file version 2 - scoped package", async () => {
@@ -139,9 +139,9 @@ describe("Test fix lockfile integrity", () => {
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
+        expect(got.get).toHaveBeenCalledTimes(1);
         const expectedJsonString = jsonString.replace(SHA1, SHA512);
         expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
-        expect(got.get).toHaveBeenCalledTimes(1);
     });
 
     it("Should not change lock file when not needed", async () => {
@@ -157,10 +157,13 @@ describe("Test fix lockfile integrity", () => {
     it("Should fetch same package/version only once", async () => {
         const jsonString = JSON.stringify({ ...LOCKFILE_V1_SIMPLE_PACKAGE, ...LOCKFILE_V2_SIMPLE_PACKAGE }, null, 2) + "\n";
         jest.spyOn(fs, "readFileSync").mockReturnValue(jsonString);
+        jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_FIXED);
         expect(got.get).toHaveBeenCalledTimes(1);
+        const expectedJsonString = jsonString.replace(new RegExp(SHA1, "g"), SHA512);
+        expect(fs.writeFileSync).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
     });
 });
