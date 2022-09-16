@@ -1,10 +1,12 @@
 ![](https://raw.githubusercontent.com/yoavain/fix-lockfile-integrity/main/resources/docs/logo.gif)
-# Fix Lockfile Intgrity 
+# Fix Lockfile Integrity 
 [![Actions Status](https://github.com/yoavain/fix-lockfile-integrity/workflows/Node%20CI/badge.svg)](https://github.com/yoavain/fix-lockfile-integrity/actions)
 ![node](https://img.shields.io/node/v/fix-lockfile-integrity.svg)
 ![types](https://img.shields.io/npm/types/typescript.svg)
 ![commit](https://img.shields.io/github/last-commit/yoavain/fix-lockfile-integrity.svg)
 ![license](https://img.shields.io/npm/l/fix-lockfile-integrity.svg)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/fix-lockfile-integrity.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/fix-lockfile-integrity/context:javascript)
 [![fix-lockfile-integrity](https://snyk.io/advisor/npm-package/fix-lockfile-integrity/badge.svg)](https://snyk.io/advisor/npm-package/fix-lockfile-integrity)
 [![Known Vulnerabilities](https://snyk.io/test/github/yoavain/fix-lockfile-integrity/badge.svg?targetFile=package.json)](https://snyk.io//test/github/yoavain/fix-lockfile-integrity?targetFile=package.json)
 [![codecov](https://codecov.io/gh/yoavain/fix-lockfile-integrity/branch/main/graph/badge.svg)](https://codecov.io/gh/yoavain/fix-lockfile-integrity)
