@@ -4,11 +4,11 @@ import type { ClioOptions } from "./types";
 
 export const parseCliOptions = async (): Promise<ClioOptions> => {
     return yargs(hideBin(process.argv))
-        .scriptName("fix-lockfile-integrity")
+        .scriptName("fix-lockfile")
         .command<ClioOptions>("* [file]", "Fix lock file integrity", (yargs) => {
             return yargs
                 .positional("file", {
-                    describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder"
+                    describe: "file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder)"
                 });
         }, (argv) => {
         })
@@ -27,6 +27,9 @@ export const parseCliOptions = async (): Promise<ClioOptions> => {
             type: "boolean",
             description: "quiet (suppresses verbose too)"
         })
+        .example("*", "fix-lockfile --config fix-lockfile.config.json package-lock.json")
+        .example("*", "fix-lockfile --quiet")
+        .epilogue("Created by Yoav Vainrich at https://github.com/yoavain/fix-lockfile-integrity")
         .help("h")
         .alias("h", "help")
         .parse();
