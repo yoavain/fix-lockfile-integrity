@@ -23,7 +23,7 @@ const prettierInitialConfig: prettier.Options = {
     printWidth: 0 // to always have new lines
 };
 
-const REGISTRY = "https://registry.npmjs.org";
+const REGISTRY_HOST = "registry.npmjs.org";
 type NPMJS_METADATA_PARTIAL = { versions: Array<Record<string, { dist: { integrity: string } }>> }
 
 /**
@@ -33,7 +33,7 @@ type NPMJS_METADATA_PARTIAL = { versions: Array<Record<string, { dist: { integri
  * @param packageVersion    package version
  */
 const getIntegrity = async (packageName: string, packageVersion: string): Promise<string> => {
-    const url: string = `${REGISTRY}/${packageName}`;
+    const url: string = `https://${REGISTRY_HOST}/${packageName}`;
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
@@ -88,7 +88,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let promises: Array<Promise<void>> = [];
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
-        if (node && node.version && node.resolved?.startsWith(REGISTRY) && node.integrity?.startsWith("sha1-")) {
+        if (node && node.version && node.resolved && new URL(node.resolved)?.host === REGISTRY_HOST && node.integrity?.startsWith("sha1-")) {
             const packageName = parsePackageName(this.key);
             const packageVersion = node.version;
             const oldIntegrity = node.integrity;
