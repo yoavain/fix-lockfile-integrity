@@ -61,12 +61,12 @@ $ fix-lockfile <file>
 
 ## CLI Options
 ```
-fix-lockfile-integrity [file]
+fix-lockfile [file]
 
 Fix lock file integrity
 
 Positionals:
-  file  file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder
+  file  file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder)
 
 Options:
       --version  Show version number                                   [boolean]
