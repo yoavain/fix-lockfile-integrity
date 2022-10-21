@@ -148,6 +148,30 @@ prettier:
     endOfLine: cr
 ```
 
+### Configuration in a Lerna monorepo
+
+For root folder and all lerna packages
+
+```js
+const { execSync } = require("child_process");
+const path = require("path");
+
+const lernaInfoOutput = execSync("lerna list --all --json", { encoding: "utf8" });
+const lernaPackages = JSON.parse(lernaInfoOutput).map(p => path.relative(__dirname, p.location));
+
+const config = {
+    includePaths: [
+        "./",
+        ...lernaPackages
+    ],
+    lockFileNames: [
+        "package-lock.json"
+    ]
+};
+
+module.exports = config;
+```
+
 ### Configuration options
 ```
 - includeFiles:     Explicit list of files to fix       (default: none)
