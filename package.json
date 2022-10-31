@@ -84,7 +84,7 @@
     "dependencies": {
         "chalk": "4.1.2",
         "cosmiconfig": "7.0.1",
-        "cosmiconfig-typescript-loader": "4.1.1",
+        "cosmiconfig-typescript-loader": "4.2.0",
         "got": "11.8.5",
         "p-limit": "3.1.0",
         "prettier": "2.7.1",
