@@ -85,7 +85,7 @@
         "chalk": "4.1.2",
         "cosmiconfig": "8.0.0",
         "cosmiconfig-typescript-loader": "4.2.0",
-        "got": "11.8.5",
+        "got": "11.8.6",
         "p-limit": "3.1.0",
         "prettier": "2.8.1",
         "traverse": "0.6.7",
