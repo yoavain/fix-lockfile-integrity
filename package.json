@@ -61,7 +61,7 @@
     "homepage": "https://github.com/yoavain/fix-lockfile-integrity#readme",
     "devDependencies": {
         "@tsconfig/node14": "1.0.3",
-        "@types/jest": "29.2.6",
+        "@types/jest": "29.4.0",
         "@types/node": "18.11.18",
         "@typescript-eslint/eslint-plugin": "5.49.0",
         "@typescript-eslint/parser": "5.49.0",
@@ -75,7 +75,7 @@
         "eslint-plugin-security": "1.6.0",
         "global-npm": "0.5.0",
         "husky": "8.0.3",
-        "jest": "29.4.0",
+        "jest": "29.4.1",
         "lint-staged": "13.1.0",
         "rimraf": "4.1.2",
         "ts-jest": "29.0.5",
