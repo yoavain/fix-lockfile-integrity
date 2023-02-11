@@ -8,6 +8,7 @@ import { detectJsonStyle } from "./jsonUtils";
 import { logger } from "./logger";
 import chalk from "chalk";
 import { FixLockFileResult } from "./types";
+import { isRegistrySupported } from "./registries";
 
 const MAX_CONCURRENT_PROMISES = 4;
 const MODE_MODULES_PREFIX = "node_modules/";
@@ -23,27 +24,27 @@ const prettierInitialConfig: prettier.Options = {
     printWidth: 0 // to always have new lines
 };
 
-const REGISTRY_HOST = "registry.npmjs.org";
-type NPMJS_METADATA_PARTIAL = { versions: Array<Record<string, { dist: { integrity: string } }>> }
+type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
 
 /**
  * Fetches for sha512 integrity for a package version
  *
+ * @param registry          registry
  * @param packageName       package name
  * @param packageVersion    package version
  */
-const getIntegrity = async (packageName: string, packageVersion: string): Promise<string> => {
-    const url: string = `https://${REGISTRY_HOST}/${packageName}`;
+const getIntegrity = async (registry: string, packageName: string, packageVersion: string): Promise<string> => {
+    const url: string = `${registry}/${packageName}/${packageVersion}`;
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
         headers: {
-            Accept: "application/vnd.npm.install-v1+json"
+            Accept: "application/json"
         }
     };
     const metadata: GotResponse<NPMJS_METADATA_PARTIAL> = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
 
-    const integrity: string = metadata?.body?.versions?.[packageVersion]?.dist?.integrity;
+    const integrity: string = metadata?.body?.dist?.integrity;
     return integrity?.startsWith("sha512") ? integrity : undefined;
 };
 
@@ -88,15 +89,16 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let promises: Array<Promise<void>> = [];
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
-        if (node && node.version && node.resolved && new URL(node.resolved)?.host === REGISTRY_HOST && node.integrity?.startsWith("sha1-")) {
-            const packageName = parsePackageName(this.key);
-            const packageVersion = node.version;
-            const oldIntegrity = node.integrity;
+        if (node && node.version && node.resolved && node.integrity?.startsWith("sha1-") && isRegistrySupported(new URL(node.resolved)?.host)) {
+            const packageName: string = parsePackageName(this.key);
+            const registry: string = node.resolved.substring(0, node.resolved.indexOf(packageName));
+            const packageVersion: string = node.version;
+            const oldIntegrity: string = node.integrity;
 
             if (!hashesFound.has(oldIntegrity)) {
                 hashesFound.add(oldIntegrity);
                 promises.push(limit(async () => {
-                    const newIntegrity = await getIntegrity(packageName, packageVersion);
+                    const newIntegrity = await getIntegrity(registry, packageName, packageVersion);
                     if (newIntegrity) {
                         integrityPairsMap[oldIntegrity] = newIntegrity;
                     }

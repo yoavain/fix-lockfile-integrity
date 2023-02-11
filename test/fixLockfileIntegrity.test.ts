@@ -43,7 +43,7 @@ const LOCKFILE_V2_SCOPED_PACKAGE = {
 
 describe("Test fix lockfile integrity", () => {
     beforeEach(() => {
-        jest.spyOn(got, "get").mockResolvedValue({ body: { versions: { "1.0.0": { dist: { integrity: SHA512 } } } } });
+        jest.spyOn(got, "get").mockResolvedValue({ body: { dist: { integrity: SHA512 } } });
 
         jest.spyOn(console, "info").mockImplementation(() => {});
         jest.spyOn(console, "error").mockImplementation(() => {});

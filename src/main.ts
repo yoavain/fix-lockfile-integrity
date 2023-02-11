@@ -3,9 +3,10 @@ import { isError } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./fixLockfileIntegrity";
 import { logger, setQuiet, setVerbose } from "./logger";
+import { parseCliOptions } from "./cli";
+import { setRegistriesConfiguration } from "./registries";
 import chalk from "chalk";
 import path from "path";
-import { parseCliOptions } from "./cli";
 
 export const main = async () => {
     const cliParams: ClioOptions = await parseCliOptions();
@@ -18,6 +19,9 @@ export const main = async () => {
 
     // Read config
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
+
+    // Set registries configuration
+    setRegistriesConfiguration(config.allRegistries, config.registries);
 
     let explicitFilesLocations =[]; // must work
     let lookupPaths = []; // requires at least one file to work

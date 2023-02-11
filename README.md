@@ -24,7 +24,7 @@
 
 
 ## Limitations
-- Fixes only with packages from npm registry [registry.npmjs.org](https://www.npmjs.com/)
+- By default, fixes only packages from npm registry [registry.npmjs.org](https://www.npmjs.com/). You can change that via configuration file
 
 
 ## Installation
@@ -91,6 +91,7 @@ import type { FixLockFileIntegrityConfig } from "fix-lockfile-integrity";
 const config: FixLockFileIntegrityConfig = {
     includePaths: ["./", "./packages/a", "./packages/b"],
     lockFileNames: ["package-lock.json"],
+    allRegistries: true,
     prettier: {
         useTabs: true,
         endOfLine: "cr"
@@ -108,6 +109,7 @@ export default config;
 const config = {
     includePaths: ["./", "./packages/a", "./packages/b"],
     lockFileNames: ["package-lock.json"],
+    allRegistries: true,
     prettier: {
         useTabs: true,
         endOfLine: "cr"
@@ -125,6 +127,7 @@ module.exports = config;
 {
     "includePaths": ["./", "./packages/a", "./packages/b"],
     "lockFileNames": ["package-lock.json"],
+    "allRegistries": true,
     "prettier": {
         "useTabs": true,
         "endOfLine": "cr"
@@ -143,6 +146,7 @@ includePaths:
     - "./packages/b"
 lockFileNames:
     - package-lock.json
+allRegistries: true
 prettier:
     useTabs: true
     endOfLine: cr
@@ -166,7 +170,8 @@ const config = {
     ],
     lockFileNames: [
         "package-lock.json"
-    ]
+    ],
+    allRegistries: true
 };
 
 module.exports = config;
@@ -177,6 +182,8 @@ module.exports = config;
 - includeFiles:     Explicit list of files to fix       (default: none)
 - includePaths:     Paths to look for lock files in     (default: ".")
 - lockFileNames:    Lock files to look for              (default: ["package-lock.json", "npm-shrinkwrap.json"])
+- allRegistries:    Fetch integrity from all registries (default: false)
+- registries:       Registries to fetch integrity from (default: ["registry.npmjs.org"])
 - prettier:         Overriding prettier config in case needed
 ```
 
