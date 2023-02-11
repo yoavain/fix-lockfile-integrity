@@ -4,7 +4,7 @@ import { getConfig } from "./config";
 import { fixLockFile } from "./fixLockfileIntegrity";
 import { logger, setQuiet, setVerbose } from "./logger";
 import { parseCliOptions } from "./cli";
-import { setAllRegistries, setRegistries } from "./registries";
+import { setRegistriesConfiguration } from "./registries";
 import chalk from "chalk";
 import path from "path";
 
@@ -21,12 +21,7 @@ export const main = async () => {
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
 
     // Set registries configuration
-    if (config.allRegistries) {
-        setAllRegistries();
-    }
-    if (config.registries) {
-        setRegistries(config.registries);
-    }
+    setRegistriesConfiguration(config.allRegistries, config.registries);
 
     let explicitFilesLocations =[]; // must work
     let lookupPaths = []; // requires at least one file to work
