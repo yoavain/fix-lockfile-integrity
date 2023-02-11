@@ -21,7 +21,7 @@ export const main = async () => {
     const config: FixLockFileIntegrityConfig = await getConfig(cliParams.config);
 
     // Set registries configuration
-    setRegistriesConfiguration(config.allRegistries, config.registries);
+    setRegistriesConfiguration(config?.allRegistries, config?.registries);
 
     let explicitFilesLocations =[]; // must work
     let lookupPaths = []; // requires at least one file to work
