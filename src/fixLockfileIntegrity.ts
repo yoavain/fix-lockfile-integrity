@@ -56,7 +56,7 @@ const parsePackageName = (key: string): string => {
 
 export const parseRegistry = (resolvedUrl: string, packageName: string): URL => {
     let url: URL = new URL(resolvedUrl);
-    url.pathname = url.pathname.substring(0, url.pathname.indexOf("/" + packageName + "/"));
+    url.pathname = url.pathname.substring(0, url.pathname.indexOf(`/${packageName}/`));
     return url;
 };
 
