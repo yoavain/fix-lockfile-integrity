@@ -53,6 +53,10 @@ const parsePackageName = (key: string): string => {
     return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
+export const parseRegistry = (resolvedUrl: string, packageName: string): string => {
+    return resolvedUrl.substring(0, resolvedUrl.indexOf("/" + packageName + "/"));
+};
+
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
     let dirtyCount: number = 0;
 
@@ -91,7 +95,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.resolved && node.integrity?.startsWith("sha1-") && isRegistrySupported(new URL(node.resolved)?.host)) {
             const packageName: string = parsePackageName(this.key);
-            const registry: string = node.resolved.substring(0, node.resolved.indexOf(packageName));
+            const registry: string = parseRegistry(node.resolved, packageName);
             const packageVersion: string = node.version;
             const oldIntegrity: string = node.integrity;
 

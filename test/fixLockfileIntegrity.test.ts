@@ -1,6 +1,6 @@
 import fs from "fs";
 import got from "got";
-import { fixLockFile, FixLockFileResult } from "../src";
+import { fixLockFile, FixLockFileResult, parseRegistry } from "../src";
 
 const SHA512 = "sha512-longHash";
 const SHA1 = "sha1-shortHash";
@@ -41,6 +41,18 @@ const LOCKFILE_V2_SCOPED_PACKAGE = {
     }
 };
 
+const SIMPLE_NAME_PACKAGE_RESOLVED = "https://registry.company.com/private/i/-/i-1.0.0.tgz";
+
+describe("Test registry parsing from resolved field", () => {
+    it("Test simple package name", () => {
+        expect(parseRegistry(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved, "packageName")).toEqual("https://registry.npmjs.org");
+    });
+
+    it("Test short package name", () => {
+        expect(parseRegistry(SIMPLE_NAME_PACKAGE_RESOLVED, "i")).toEqual("https://registry.company.com/private");
+    });
+});
+
 describe("Test fix lockfile integrity", () => {
     beforeEach(() => {
         jest.spyOn(got, "get").mockResolvedValue({ body: { dist: { integrity: SHA512 } } });
@@ -53,12 +65,12 @@ describe("Test fix lockfile integrity", () => {
     afterEach(() => {
         jest.restoreAllMocks();
     });
-    
+
     it("Test fixLockFile - file not found", async () => {
         jest.spyOn(fs, "readFileSync").mockImplementation(() => {
             throw new Error("File not found");
         });
-        
+
         const result: FixLockFileResult = await fixLockFile("fileLocation");
 
         expect(result).toEqual(FixLockFileResult.FILE_NOT_FOUND_ERROR);
