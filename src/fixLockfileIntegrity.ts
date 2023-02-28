@@ -33,8 +33,9 @@ type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
  * @param packageName       package name
  * @param packageVersion    package version
  */
-const getIntegrity = async (registry: string, packageName: string, packageVersion: string): Promise<string> => {
-    const url: string = `${registry}/${packageName}/${packageVersion}`;
+const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+    const integrityUrlPath: string = [...registry.pathname.split("/").filter(Boolean), packageName, packageVersion].join("/");
+    const url: URL = new URL(integrityUrlPath, registry);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
@@ -53,8 +54,10 @@ const parsePackageName = (key: string): string => {
     return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
-export const parseRegistry = (resolvedUrl: string, packageName: string): string => {
-    return resolvedUrl.substring(0, resolvedUrl.indexOf("/" + packageName + "/"));
+export const parseRegistry = (resolvedUrl: string, packageName: string): URL => {
+    let url: URL = new URL(resolvedUrl);
+    url.pathname = url.pathname.substring(0, url.pathname.indexOf("/" + packageName + "/"));
+    return url;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
@@ -95,7 +98,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.resolved && node.integrity?.startsWith("sha1-") && isRegistrySupported(new URL(node.resolved)?.host)) {
             const packageName: string = parsePackageName(this.key);
-            const registry: string = parseRegistry(node.resolved, packageName);
+            const registry: URL = parseRegistry(node.resolved, packageName);
             const packageVersion: string = node.version;
             const oldIntegrity: string = node.integrity;
 

@@ -45,11 +45,11 @@ const SIMPLE_NAME_PACKAGE_RESOLVED = "https://registry.company.com/private/i/-/i
 
 describe("Test registry parsing from resolved field", () => {
     it("Test simple package name", () => {
-        expect(parseRegistry(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved, "packageName")).toEqual("https://registry.npmjs.org");
+        expect(parseRegistry(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved, "packageName").toString()).toEqual("https://registry.npmjs.org/");
     });
 
     it("Test short package name", () => {
-        expect(parseRegistry(SIMPLE_NAME_PACKAGE_RESOLVED, "i")).toEqual("https://registry.company.com/private");
+        expect(parseRegistry(SIMPLE_NAME_PACKAGE_RESOLVED, "i").toString()).toEqual("https://registry.company.com/private");
     });
 });
 
