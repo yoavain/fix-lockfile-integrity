@@ -1,19 +1,19 @@
-export const NPMJS_REGISTRY_HOST = "registry.npmjs.org";
+export const NPMJS_REGISTRY_URL: URL = new URL("https://registry.npmjs.org");
 
-let registries: Set<string> = new Set<string>([NPMJS_REGISTRY_HOST]);
+let registriesHostNames: Set<string> = new Set<string>([NPMJS_REGISTRY_URL.hostname]);
 let allRegistries: boolean = false;
 
-export const setRegistriesConfiguration = (setAllRegistries: boolean, newRegistries?: string[]): void => {
+export const setRegistriesConfiguration = (setAllRegistries: boolean, newRegistries?: URL[]): void => {
     allRegistries = setAllRegistries;
-    registries = new Set<string>([NPMJS_REGISTRY_HOST]);
+    registriesHostNames = new Set<string>([NPMJS_REGISTRY_URL.hostname]);
     if (newRegistries?.length) {
-        newRegistries.forEach((reg) => registries.add(reg));
+        newRegistries.forEach((registryUrl: URL) => registriesHostNames.add(registryUrl.hostname));
     }
 };
 
-export const isRegistrySupported = (host: string): boolean => {
-    if (!host) {
+export const isRegistrySupported = (url: URL): boolean => {
+    if (!url?.hostname) {
         return false;
     }
-    return allRegistries || registries.has(host);
+    return allRegistries || registriesHostNames.has(url?.hostname);
 };

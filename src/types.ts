@@ -11,7 +11,7 @@ export type FixLockFileIntegrityConfig = {
     includeFiles?: Array<string>
     includePaths?: Array<string>
     lockFileNames?: Array<string>
-    registries?: Array<string>
+    registries?: Array<URL>
     allRegistries?: boolean
     prettier?: prettier.Options
 }
