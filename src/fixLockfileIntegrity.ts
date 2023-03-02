@@ -10,8 +10,8 @@ import chalk from "chalk";
 import { FixLockFileResult } from "./types";
 import { isRegistrySupported } from "./registries";
 
-const MAX_CONCURRENT_PROMISES = 4;
-const MODE_MODULES_PREFIX = "node_modules/";
+const MAX_CONCURRENT_PROMISES: number = 4;
+const MODE_MODULES_PREFIX: string = "node_modules/";
 
 /**
  * Global cache: old hash -> new hash map
@@ -33,8 +33,9 @@ type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
  * @param packageName       package name
  * @param packageVersion    package version
  */
-const getIntegrity = async (registry: string, packageName: string, packageVersion: string): Promise<string> => {
-    const url: string = `${registry}/${packageName}/${packageVersion}`;
+const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+    const integrityUrlPath: string = [...registry.pathname.split("/").filter(Boolean), packageName, packageVersion].join("/");
+    const url: URL = new URL(integrityUrlPath, registry);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
@@ -53,8 +54,10 @@ const parsePackageName = (key: string): string => {
     return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
-export const parseRegistry = (resolvedUrl: string, packageName: string): string => {
-    return resolvedUrl.substring(0, resolvedUrl.indexOf("/" + packageName + "/"));
+export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
+    const registryUrl: URL = new URL(url.href);
+    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`));
+    return registryUrl;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
@@ -63,7 +66,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     // Read lock file
     let jsonString: string;
     try {
-        jsonString = fs.readFileSync(lockFileLocation, "utf8");
+        jsonString = await fs.promises.readFile(lockFileLocation, "utf8");
     }
     catch (e) {
         logger.warn(`${chalk.red("Lock file")} ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
@@ -93,9 +96,16 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let promises: Array<Promise<void>> = [];
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
-        if (node && node.version && node.resolved && node.integrity?.startsWith("sha1-") && isRegistrySupported(new URL(node.resolved)?.host)) {
+        let resolvedUrl: URL;
+        try {
+            resolvedUrl = new URL(node.resolved);
+        }
+        catch (e) {
+            logger.warn(`${chalk.red("Resolved URL")} ${chalk.blue(node.resolved)} is not a valid URL`);
+        }
+        if (node && node.version && resolvedUrl && node.integrity?.startsWith("sha1-") && isRegistrySupported(resolvedUrl)) {
             const packageName: string = parsePackageName(this.key);
-            const registry: string = parseRegistry(node.resolved, packageName);
+            const registry: URL = parseRegistryWithPath(resolvedUrl, packageName);
             const packageVersion: string = node.version;
             const oldIntegrity: string = node.integrity;
 
@@ -123,7 +133,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     if (dirtyCount) {
         try {
             const lockFileString: string = prettier.format(JSON.stringify(fixedLockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
-            fs.writeFileSync(lockFileLocation, lockFileString, "utf8");
+            await fs.promises.writeFile(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
             logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);

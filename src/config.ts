@@ -3,12 +3,13 @@ import { cosmiconfig, defaultLoaders } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
 import path from "path";
+import type * as prettier from "prettier";
 import type { FixLockFileIntegrityConfig } from "./types";
 import { defaultFixLockFileIntegrityConfig, defaultPrettierOptions } from "./consts";
 import { logger } from "./logger";
 import chalk from "chalk";
 
-const MODULE_NAME = "fix-lockfile";
+const MODULE_NAME: string = "fix-lockfile";
 
 const customDefaultLoader = (ext: string): LoaderSync => {
     return (filepath: string, content: string) => {
@@ -57,6 +58,22 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
     if (cosmiconfigResult?.config) {
         logger.verbose(`Configuration read:\n${chalk.magentaBright(JSON.stringify(cosmiconfigResult.config, null, 2))}`);
     }
-    const prettierConfig = { ...defaultPrettierOptions, ...(cosmiconfigResult?.config as FixLockFileIntegrityConfig)?.prettier };
-    return { ...defaultFixLockFileIntegrityConfig, ...cosmiconfigResult?.config as FixLockFileIntegrityConfig, prettier: prettierConfig };
+    const prettierConfig: prettier.Options = {
+        ...defaultPrettierOptions,
+        ...(cosmiconfigResult?.config as FixLockFileIntegrityConfig)?.prettier
+    };
+
+    return {
+        ...defaultFixLockFileIntegrityConfig,
+        ...cosmiconfigResult?.config as FixLockFileIntegrityConfig,
+        registries: (cosmiconfigResult?.config?.registries as string[])?.map((registry: string) => {
+            try {
+                return new URL(registry);
+            }
+            catch (e) {
+                logger.warn(`Invalid registry URL in configuration: chalk.red(${registry})`);
+            }
+        }).filter(Boolean),
+        prettier: prettierConfig
+    };
 };
