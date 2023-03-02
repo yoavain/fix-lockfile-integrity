@@ -1,6 +1,6 @@
 import fs from "fs";
 import got from "got";
-import { fixLockFile, FixLockFileResult, parseRegistry } from "../src";
+import { fixLockFile, FixLockFileResult, parseRegistryWithPath } from "../src";
 
 const fsPromises = fs.promises;
 
@@ -48,11 +48,11 @@ const SIMPLE_NAME_PACKAGE_RESOLVED = "https://registry.company.com/private/i/-/i
 describe("Test fix lockfile integrity", () => {
     describe("Test registry parsing from resolved field", () => {
         it("Test simple package name", () => {
-            expect(parseRegistry(new URL(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved), "packageName").toString()).toEqual(new URL("https://registry.npmjs.org").toString());
+            expect(parseRegistryWithPath(new URL(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved), "packageName").toString()).toEqual(new URL("https://registry.npmjs.org").toString());
         });
 
         it("Test short package name", () => {
-            expect(parseRegistry(new URL(SIMPLE_NAME_PACKAGE_RESOLVED), "i").toString()).toEqual(new URL("https://registry.company.com/private").toString());
+            expect(parseRegistryWithPath(new URL(SIMPLE_NAME_PACKAGE_RESOLVED), "i").toString()).toEqual(new URL("https://registry.company.com/private").toString());
         });
     });
 

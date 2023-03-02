@@ -54,9 +54,10 @@ const parsePackageName = (key: string): string => {
     return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
-export const parseRegistry = (url: URL, packageName: string): URL => {
-    url.pathname = url.pathname.substring(0, url.pathname.indexOf(`/${packageName}/`));
-    return url;
+export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
+    const registryUrl: URL = new URL(url.href);
+    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`));
+    return registryUrl;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
@@ -104,7 +105,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         }
         if (node && node.version && resolvedUrl && node.integrity?.startsWith("sha1-") && isRegistrySupported(resolvedUrl)) {
             const packageName: string = parsePackageName(this.key);
-            const registry: URL = parseRegistry(resolvedUrl, packageName);
+            const registry: URL = parseRegistryWithPath(resolvedUrl, packageName);
             const packageVersion: string = node.version;
             const oldIntegrity: string = node.integrity;
 
