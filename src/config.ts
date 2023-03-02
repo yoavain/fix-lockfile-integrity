@@ -9,7 +9,7 @@ import { defaultFixLockFileIntegrityConfig, defaultPrettierOptions } from "./con
 import { logger } from "./logger";
 import chalk from "chalk";
 
-const MODULE_NAME = "fix-lockfile";
+const MODULE_NAME: string = "fix-lockfile";
 
 const customDefaultLoader = (ext: string): LoaderSync => {
     return (filepath: string, content: string) => {
@@ -66,7 +66,14 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
     return {
         ...defaultFixLockFileIntegrityConfig,
         ...cosmiconfigResult?.config as FixLockFileIntegrityConfig,
-        registries: (cosmiconfigResult?.config?.registries as string[])?.map((r: string) => new URL(r)),
+        registries: (cosmiconfigResult?.config?.registries as string[])?.map((registry: string) => {
+            try {
+                return new URL(registry);
+            }
+            catch (e) {
+                logger.warn(`Invalid registry URL in configuration: chalk.red(${registry})`);
+            }
+        }).filter(Boolean),
         prettier: prettierConfig
     };
 };
