@@ -15,5 +15,5 @@ export const isRegistrySupported = (url: URL): boolean => {
     if (!url?.hostname) {
         return false;
     }
-    return allRegistries || registriesHostNames.has(url?.hostname);
+    return allRegistries || registriesHostNames.has(url.hostname);
 };
