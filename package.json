@@ -1,6 +1,6 @@
 {
     "name": "fix-lockfile-integrity",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "description": "Fix lockfile integrity",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
