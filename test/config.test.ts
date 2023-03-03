@@ -128,6 +128,6 @@ describe("Test config", () => {
             }
         });
         expect(console.warn).toHaveBeenCalledTimes(1);
-        expect(console.warn).toHaveBeenCalledWith("Invalid registry URL in configuration: chalk.red(invalidUrl)");
+        expect(console.warn).toHaveBeenCalledWith("Invalid registry URL in configuration: chalk.red(invalid[::]Url)");
     });
 });

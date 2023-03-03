@@ -68,10 +68,17 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
         ...cosmiconfigResult?.config as FixLockFileIntegrityConfig,
         registries: (cosmiconfigResult?.config?.registries as string[])?.map((registry: string) => {
             try {
+                // Assume it is a URL
                 return new URL(registry);
             }
             catch (e) {
-                logger.warn(`Invalid registry URL in configuration: chalk.red(${registry})`);
+                try {
+                    // Assume it is a hostname
+                    new URL(`https://${registry}`);
+                }
+                catch (e) {
+                    logger.warn(`Invalid registry URL in configuration: chalk.red(${registry})`);
+                }
             }
         }).filter(Boolean),
         prettier: prettierConfig

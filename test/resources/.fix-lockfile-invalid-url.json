@@ -1,7 +1,7 @@
 {
     "includePaths": ["./", "./packages/a", "./packages/b"],
     "lockFileNames": ["package-lock.json"],
-    "registries": ["https://www.goodurl.com", "invalidUrl"],
+    "registries": ["https://www.goodurl.com", "invalid[::]Url"],
     "prettier": {
         "useTabs": true,
         "endOfLine": "cr"
