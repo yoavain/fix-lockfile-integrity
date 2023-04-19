@@ -1,6 +1,6 @@
 import traverse from "traverse";
 import pLimit from "p-limit";
-import type { OptionsOfJSONResponseBody, Response as GotResponse } from "got";
+import type { OptionsOfJSONResponseBody, Response } from "got";
 import got from "got";
 import fs from "fs";
 import * as prettier from "prettier";
@@ -47,10 +47,25 @@ const getIntegrity = async (registry: URL, packageName: string, packageVersion: 
             Accept: "application/json"
         }
     };
-    const metadata: GotResponse<NPMJS_METADATA_PARTIAL> = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+    let metadata: Response<NPMJS_METADATA_PARTIAL>;
+    try {
+        metadata = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+    }
+    catch (error) {
+        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(error.message)}`);
+        return undefined;
+    }
+
+    if (metadata.statusCode < 200 || metadata.statusCode >= 300) {
+        logger.warn(`${chalk.red("Received")} ${chalk.blue(metadata.statusCode)} ${chalk.red("response from API:")} ${chalk.blue(url.toString())}`);
+        return undefined;
+    }
 
     const integrity: string = metadata?.body?.dist?.integrity;
-    return integrity?.startsWith("sha512") ? integrity : undefined;
+    if (!integrity?.startsWith("sha512")) {
+        logger.warn(`${chalk.red("Unable to retrieve sha512 from API response:")} ${chalk.blue(url.toString())}`);
+    }
+    return integrity;
 };
 
 const parsePackageName = (key: string): string => {
