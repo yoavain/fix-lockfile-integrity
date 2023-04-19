@@ -26,6 +26,11 @@ const prettierInitialConfig: prettier.Options = {
 
 type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
 
+export const formHashApiUrl = (registry: URL, packageName: string, packageVersion: string) => {
+    const integrityUrlPath: string = [packageName, packageVersion].join("/");
+    return new URL(integrityUrlPath, registry);
+};
+
 /**
  * Fetches for sha512 integrity for a package version
  *
@@ -34,8 +39,7 @@ type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
  * @param packageVersion    package version
  */
 const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
-    const integrityUrlPath: string = [...registry.pathname.split("/").filter(Boolean), packageName, packageVersion].join("/");
-    const url: URL = new URL(integrityUrlPath, registry);
+    const url: URL = formHashApiUrl(registry, packageName, packageVersion);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
@@ -51,12 +55,12 @@ const getIntegrity = async (registry: URL, packageName: string, packageVersion: 
 
 const parsePackageName = (key: string): string => {
     const index: number = key.lastIndexOf(MODE_MODULES_PREFIX);
-    return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
+    return index >= 0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
 export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
     const registryUrl: URL = new URL(url.href);
-    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`));
+    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`) + 1);
     return registryUrl;
 };
 
