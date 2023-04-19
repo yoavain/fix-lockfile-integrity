@@ -1,6 +1,6 @@
 import fs from "fs";
 import got from "got";
-import { fixLockFile, FixLockFileResult, formHashApiUrl, parseRegistryWithPath } from "../src";
+import { fixLockFile, FixLockFileResult, formHashApiUrl, getIntegrity, logger, parseRegistryWithPath } from "../src";
 
 const fsPromises = fs.promises;
 
@@ -78,6 +78,55 @@ describe("Test fix lockfile integrity", () => {
             let registryPathUrl: URL = parseRegistryWithPath(new URL(LOCKFILE_V1_SCOPED_PACKAGE[packageName].resolved), packageName);
             let apiUrl = formHashApiUrl(registryPathUrl, packageName, LOCKFILE_V1_SCOPED_PACKAGE[packageName].version);
             expect(apiUrl.toString()).toEqual("https://registry.npmjs.org/@scopeName/packageName/1.0.0");
+        });
+    });
+
+    describe("Test error handling hitting hash API", () => {
+        const packageName = Object.keys(LOCKFILE_V1_SIMPLE_PACKAGE)[0];
+        const registry = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].resolved;
+        const packageVersion = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].version;
+
+        it("should log warning when error retrieving response from API", async () => {
+            const mockedError = new Error("Error message");
+            jest.spyOn(got, "get").mockRejectedValue(mockedError);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
+        });
+
+        it("should log warning when unable to retrieve sha512 from API response", async () => {
+            const mockedResponse = {
+                statusCode: 200,
+                body: {
+                    dist: {
+                        integrity: "sha1-abc"
+                    }
+                }
+            };
+            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
+        });
+
+        it("should return undefined and log warning when API returns 404", async () => {
+            const mockedResponse = {
+                statusCode: 404,
+                body: {}
+            };
+            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
         });
     });
 

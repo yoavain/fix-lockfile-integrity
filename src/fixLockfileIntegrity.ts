@@ -38,7 +38,7 @@ export const formHashApiUrl = (registry: URL, packageName: string, packageVersio
  * @param packageName       package name
  * @param packageVersion    package version
  */
-const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
     const url: URL = formHashApiUrl(registry, packageName, packageVersion);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
@@ -64,6 +64,7 @@ const getIntegrity = async (registry: URL, packageName: string, packageVersion: 
     const integrity: string = metadata?.body?.dist?.integrity;
     if (!integrity?.startsWith("sha512")) {
         logger.warn(`${chalk.red("Unable to retrieve sha512 from API response:")} ${chalk.blue(url.toString())}`);
+        return undefined;
     }
     return integrity;
 };
