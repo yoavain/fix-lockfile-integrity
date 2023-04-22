@@ -1,6 +1,6 @@
 import fs from "fs";
 import got from "got";
-import { fixLockFile, FixLockFileResult, parseRegistryWithPath } from "../src";
+import { fixLockFile, FixLockFileResult, formHashApiUrl, getIntegrity, logger, parseRegistryWithPath } from "../src";
 
 const fsPromises = fs.promises;
 
@@ -20,6 +20,15 @@ const LOCKFILE_V1_SIMPLE_PACKAGE = {
         ]
     }
 };
+
+const LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE = {
+    i: {
+        version: "1.0.0",
+        resolved: "https://registry.company.com/private/subpath/i/-/i-1.0.0.tgz",
+        integrity: SHA1
+    }
+};
+
 const LOCKFILE_V1_SCOPED_PACKAGE = {
     "@scopeName/packageName": {
         version: "1.0.0",
@@ -43,16 +52,81 @@ const LOCKFILE_V2_SCOPED_PACKAGE = {
     }
 };
 
-const SIMPLE_NAME_PACKAGE_RESOLVED = "https://registry.company.com/private/i/-/i-1.0.0.tgz";
-
 describe("Test fix lockfile integrity", () => {
     describe("Test registry parsing from resolved field", () => {
         it("Test simple package name", () => {
-            expect(parseRegistryWithPath(new URL(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved), "packageName").toString()).toEqual(new URL("https://registry.npmjs.org").toString());
+            let registryPathUrl = parseRegistryWithPath(new URL(LOCKFILE_V1_SIMPLE_PACKAGE.packageName.resolved), "packageName");
+            expect(registryPathUrl.toString()).toEqual("https://registry.npmjs.org/");
         });
 
         it("Test short package name", () => {
-            expect(parseRegistryWithPath(new URL(SIMPLE_NAME_PACKAGE_RESOLVED), "i").toString()).toEqual(new URL("https://registry.company.com/private").toString());
+            let registryPathUrl = parseRegistryWithPath(new URL(LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE.i.resolved), "i");
+            expect(registryPathUrl.toString()).toEqual("https://registry.company.com/private/subpath/");
+        });
+    });
+
+    describe("Test API URL forming", () => {
+        it("Test private NPM registry package", () => {
+            let packageName = Object.keys(LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE)[0];
+            let registryPathUrl: URL = parseRegistryWithPath(new URL(LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE[packageName].resolved), packageName);
+            let apiUrl = formHashApiUrl(registryPathUrl, packageName, LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE[packageName].version);
+            expect(apiUrl.toString()).toEqual("https://registry.company.com/private/subpath/i/1.0.0");
+        });
+
+        it("Test scoped package", () => {
+            let packageName = Object.keys(LOCKFILE_V1_SCOPED_PACKAGE)[0];
+            let registryPathUrl: URL = parseRegistryWithPath(new URL(LOCKFILE_V1_SCOPED_PACKAGE[packageName].resolved), packageName);
+            let apiUrl = formHashApiUrl(registryPathUrl, packageName, LOCKFILE_V1_SCOPED_PACKAGE[packageName].version);
+            expect(apiUrl.toString()).toEqual("https://registry.npmjs.org/@scopeName/packageName/1.0.0");
+        });
+    });
+
+    describe("Test error handling hitting hash API", () => {
+        const packageName = Object.keys(LOCKFILE_V1_SIMPLE_PACKAGE)[0];
+        const registry = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].resolved;
+        const packageVersion = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].version;
+
+        it("should log warning when error retrieving response from API", async () => {
+            const mockedError = new Error("Error message");
+            jest.spyOn(got, "get").mockRejectedValue(mockedError);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
+        });
+
+        it("should log warning when unable to retrieve sha512 from API response", async () => {
+            const mockedResponse = {
+                statusCode: 200,
+                body: {
+                    dist: {
+                        integrity: "sha1-abc"
+                    }
+                }
+            };
+            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
+        });
+
+        it("should return undefined and log warning when API returns 404", async () => {
+            const mockedResponse = {
+                statusCode: 404,
+                body: {}
+            };
+            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledTimes(1);
         });
     });
 

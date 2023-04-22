@@ -1,6 +1,6 @@
 import traverse from "traverse";
 import pLimit from "p-limit";
-import type { OptionsOfJSONResponseBody, Response as GotResponse } from "got";
+import type { OptionsOfJSONResponseBody, Response } from "got";
 import got from "got";
 import fs from "fs";
 import * as prettier from "prettier";
@@ -26,6 +26,11 @@ const prettierInitialConfig: prettier.Options = {
 
 type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
 
+export const formHashApiUrl = (registry: URL, packageName: string, packageVersion: string) => {
+    const integrityUrlPath: string = [packageName, packageVersion].join("/");
+    return new URL(integrityUrlPath, registry);
+};
+
 /**
  * Fetches for sha512 integrity for a package version
  *
@@ -33,9 +38,8 @@ type NPMJS_METADATA_PARTIAL = { dist: { integrity: string } };
  * @param packageName       package name
  * @param packageVersion    package version
  */
-const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
-    const integrityUrlPath: string = [...registry.pathname.split("/").filter(Boolean), packageName, packageVersion].join("/");
-    const url: URL = new URL(integrityUrlPath, registry);
+export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+    const url: URL = formHashApiUrl(registry, packageName, packageVersion);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
         throwHttpErrors: false,
@@ -43,20 +47,36 @@ const getIntegrity = async (registry: URL, packageName: string, packageVersion: 
             Accept: "application/json"
         }
     };
-    const metadata: GotResponse<NPMJS_METADATA_PARTIAL> = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+    let metadata: Response<NPMJS_METADATA_PARTIAL>;
+    try {
+        metadata = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+    }
+    catch (error) {
+        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(error.message)}`);
+        return undefined;
+    }
+
+    if (metadata.statusCode < 200 || metadata.statusCode >= 300) {
+        logger.warn(`${chalk.red("Received")} ${chalk.blue(metadata.statusCode)} ${chalk.red("response from API:")} ${chalk.blue(url.toString())}`);
+        return undefined;
+    }
 
     const integrity: string = metadata?.body?.dist?.integrity;
-    return integrity?.startsWith("sha512") ? integrity : undefined;
+    if (!integrity?.startsWith("sha512")) {
+        logger.warn(`${chalk.red("Unable to retrieve sha512 from API response:")} ${chalk.blue(url.toString())}`);
+        return undefined;
+    }
+    return integrity;
 };
 
 const parsePackageName = (key: string): string => {
     const index: number = key.lastIndexOf(MODE_MODULES_PREFIX);
-    return index >=0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
+    return index >= 0 ? key.substring(index + MODE_MODULES_PREFIX.length) : key;
 };
 
 export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
     const registryUrl: URL = new URL(url.href);
-    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`));
+    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`) + 1);
     return registryUrl;
 };
 
