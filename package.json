@@ -61,10 +61,10 @@
     "homepage": "https://github.com/yoavain/fix-lockfile-integrity#readme",
     "devDependencies": {
         "@tsconfig/node18": "18.2.0",
-        "@types/jest": "29.5.2",
+        "@types/jest": "29.5.3",
         "@types/node": "18.16.19",
-        "@typescript-eslint/eslint-plugin": "5.61.0",
-        "@typescript-eslint/parser": "5.61.0",
+        "@typescript-eslint/eslint-plugin": "5.62.0",
+        "@typescript-eslint/parser": "5.62.0",
         "add-shebang": "0.1.0",
         "cross-env": "7.0.3",
         "del": "7.0.0",
@@ -87,7 +87,7 @@
         "cosmiconfig-typescript-loader": "4.3.0",
         "got": "11.8.6",
         "p-limit": "3.1.0",
-        "prettier": "2.8.8",
+        "prettier": "3.0.0",
         "traverse": "0.6.7",
         "ts-node": "10.9.1",
         "yargs": "17.7.2"
