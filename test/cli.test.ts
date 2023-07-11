@@ -5,6 +5,10 @@ describe("Test cli", () => {
     let originalArgv;
     beforeEach(() => {
         originalArgv = process.argv;
+        // @ts-ignore
+        jest.spyOn(process, "exit").mockImplementation((code: number) => {
+            expect(code).toEqual(0);
+        });
     });
     afterEach(() => {
         jest.restoreAllMocks();
@@ -26,6 +30,10 @@ describe("Test cli", () => {
     });
 
     it("Should parse file", async () => {
+        // @ts-ignore
+        jest.spyOn(process, "exit").mockImplementation((code: number) => {
+            expect(code).toEqual(0);
+        });
         process.argv = [
             "node",
             "cli.js",
