@@ -17,11 +17,13 @@ describe("Test json utils", () => {
         expect(jsonStyle.useTabs).toBeFalsy();
     });
     it("Should detect LF end of line", () => {
-        const jsonStyle = detectJsonStyle(prettier.format(JSON.stringify(mockJson, null, 2), { parser: "json", endOfLine: "lf" }));
+        const jsonString = prettier.format(JSON.stringify(mockJson, null, 2), { parser: "json", endOfLine: "lf" });
+        const jsonStyle = detectJsonStyle(jsonString);
         expect(jsonStyle.endOfLine).toEqual("lf");
     });
     it("Should detect CRLF end of line", () => {
-        const jsonStyle = detectJsonStyle(prettier.format(JSON.stringify(mockJson, null, 2), { parser: "json", endOfLine: "crlf" }));
+        const jsonString = prettier.format(JSON.stringify(mockJson, null, 2), { parser: "json", endOfLine: "crlf" });
+        const jsonStyle = detectJsonStyle(jsonString);
         expect(jsonStyle.endOfLine).toEqual("crlf");
     });
 });
