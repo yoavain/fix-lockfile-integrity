@@ -41,9 +41,10 @@ jobs:
 
       - name: Codecov
         if: matrix.node-version == '20'
-        uses: codecov/codecov-action@v3.1.6
+        uses: codecov/codecov-action@v4.3.0
         with:
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   publish:
     runs-on: windows-latest
