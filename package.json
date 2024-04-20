@@ -50,7 +50,7 @@
     "license": "MIT",
     "engines": {
         "node": ">=14 <21",
-        "npm": "<=9"
+        "npm": "<=10"
     },
     "files": [
         "dist/**"
@@ -60,9 +60,9 @@
     },
     "homepage": "https://github.com/yoavain/fix-lockfile-integrity#readme",
     "devDependencies": {
-        "@tsconfig/node18": "18.2.2",
+        "@tsconfig/node20": "20.1.4",
         "@types/jest": "29.5.10",
-        "@types/node": "20.10.0",
+        "@types/node": "20.12.6",
         "@typescript-eslint/eslint-plugin": "5.62.0",
         "@typescript-eslint/parser": "5.62.0",
         "add-shebang": "0.1.0",
