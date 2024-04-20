@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ '16', '18' ]
+        node-version: [ '18', '20' ]
 
     steps:
       - name: Checkout
@@ -40,10 +40,11 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Codecov
-        if: matrix.node-version == '18'
-        uses: codecov/codecov-action@v3.1.4
+        if: matrix.node-version == '20'
+        uses: codecov/codecov-action@v4.3.0
         with:
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   publish:
     runs-on: windows-latest
@@ -51,7 +52,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        node-version: [ '18' ]
+        node-version: [ '20' ]
 
     steps:
       - name: Checkout
