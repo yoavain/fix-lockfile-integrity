@@ -41,7 +41,7 @@ jobs:
 
       - name: Codecov
         if: matrix.node-version == '18'
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v4.3.0
         with:
           fail_ci_if_error: true
 
