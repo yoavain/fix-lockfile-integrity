@@ -49,8 +49,8 @@
     "author": "yoavain",
     "license": "MIT",
     "engines": {
-        "node": ">=14 <21",
-        "npm": "<=10"
+        "node": ">=14",
+        "npm": ">=9"
     },
     "files": [
         "dist/**"
