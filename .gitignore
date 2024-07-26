@@ -61,3 +61,4 @@ typings/
 /launcher-dist/
 /.husky/_/husky.sh
 /npm-shrinkwrap.json
+/.eslint-cache/

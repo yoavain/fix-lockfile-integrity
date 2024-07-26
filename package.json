@@ -15,7 +15,7 @@
         "build:no-test": "npm run tsc && npm run add-shebang && npm run package",
         "build:no-test:ci": "npm run tsc && npm run add-shebang && del package-lock.json && npm prune --production && npm shrinkwrap && npm run package",
         "test": "npm run eslint && npm run type-check && npm run jest",
-        "eslint": "eslint src/ test/",
+        "eslint": "eslint --cache --cache-location ./.eslint-cache/ --cache-strategy content src/ test/",
         "eslint:fix": "npm run eslint -- --fix",
         "type-check": "tsc --build tsconfig.json",
         "jest": "cross-env FORCE_COLOR=0 jest",
@@ -78,7 +78,7 @@
         "jest": "29.7.0",
         "lint-staged": "15.2.7",
         "rimraf": "6.0.1",
-        "ts-jest": "29.2.0",
+        "ts-jest": "29.2.3",
         "typescript": "5.5.4"
     },
     "dependencies": {
