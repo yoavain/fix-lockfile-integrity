@@ -76,7 +76,7 @@
         "global-npm": "0.5.0",
         "husky": "9.1.7",
         "jest": "29.7.0",
-        "lint-staged": "15.4.2",
+        "lint-staged": "15.4.3",
         "rimraf": "6.0.1",
         "ts-jest": "29.2.5",
         "typescript": "5.7.3"
