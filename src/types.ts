@@ -2,7 +2,7 @@ import type * as prettier from "prettier";
 
 export type ClioOptions = {
     file?: string
-    config: string
+    config?: string
     quiet: boolean
     verbose: boolean
 }

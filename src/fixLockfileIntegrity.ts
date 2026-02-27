@@ -13,10 +13,6 @@ import { isRegistrySupported } from "./registries";
 const MAX_CONCURRENT_PROMISES: number = 4;
 const MODE_MODULES_PREFIX: string = "node_modules/";
 
-/**
- * Global cache: old hash -> new hash map
- */
-const integrityPairsMap: Record<string, string> = {};
 
 // Prettier config
 const prettierInitialConfig: prettier.Options = {
@@ -38,7 +34,7 @@ export const formHashApiUrl = (registry: URL, packageName: string, packageVersio
  * @param packageName       package name
  * @param packageVersion    package version
  */
-export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string | undefined> => {
     const url: URL = formHashApiUrl(registry, packageName, packageVersion);
     const options: OptionsOfJSONResponseBody = {
         responseType: "json",
@@ -52,7 +48,8 @@ export const getIntegrity = async (registry: URL, packageName: string, packageVe
         metadata = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
     }
     catch (error) {
-        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(error.message)}`);
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(message)}`);
         return undefined;
     }
 
@@ -76,11 +73,16 @@ const parsePackageName = (key: string): string => {
 
 export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
     const registryUrl: URL = new URL(url.href);
-    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`) + 1);
+    const index = registryUrl.pathname.indexOf(`/${packageName}/`);
+    if (index === -1) {
+        throw new Error(`Package name "${packageName}" not found in registry URL: ${url.href}`);
+    }
+    registryUrl.pathname = registryUrl.pathname.substring(0, index + 1);
     return registryUrl;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
+    const integrityPairsMap: Record<string, string> = {};
     let dirtyCount: number = 0;
 
     // Read lock file
@@ -117,11 +119,13 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
         let resolvedUrl: URL;
-        try {
-            resolvedUrl = new URL(node.resolved);
-        }
-        catch (e) {
-            logger.warn(`${chalk.red("Resolved URL")} ${chalk.blue(node.resolved)} is not a valid URL`);
+        if (node.resolved) {
+            try {
+                resolvedUrl = new URL(node.resolved);
+            }
+            catch (e) {
+                logger.warn(`${chalk.red("Resolved URL")} ${chalk.blue(node.resolved)} is not a valid URL`);
+            }
         }
         if (node && node.version && resolvedUrl && node.integrity?.startsWith("sha1-") && isRegistrySupported(resolvedUrl)) {
             const packageName: string = parsePackageName(this.key);
@@ -156,7 +160,8 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
             await fs.promises.writeFile(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
-            logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);
+            const message = e instanceof Error ? e.message : String(e);
+            logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(message)}`);
             return FixLockFileResult.FILE_WRITE_ERROR;
         }
         logger.info(`${chalk.green("Overwriting lock file")} ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
