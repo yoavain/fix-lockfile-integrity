@@ -74,10 +74,10 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
             catch (e) {
                 try {
                     // Assume it is a hostname
-                    new URL(`https://${registry}`);
+                    return new URL(`https://${registry}`);
                 }
                 catch (e) {
-                    logger.warn(`Invalid registry URL in configuration: chalk.red(${registry})`);
+                    logger.warn(`Invalid registry URL in configuration: ${chalk.red(registry)}`);
                 }
             }
         }).filter(Boolean),

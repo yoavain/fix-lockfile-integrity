@@ -25,7 +25,7 @@ describe("Test logger", () => {
         loggerCallAll();
 
         expect(console.info).toHaveBeenCalledTimes(1);
-        expect(console.warn).toHaveBeenCalledTimes(0);
+        expect(console.warn).toHaveBeenCalledTimes(1);
         expect(console.error).toHaveBeenCalledTimes(1);
     });
 
