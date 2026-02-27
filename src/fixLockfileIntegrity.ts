@@ -6,7 +6,7 @@ import fs from "fs";
 import * as prettier from "prettier";
 import { detectJsonStyle } from "./jsonUtils";
 import { logger } from "./logger";
-import chalk from "chalk";
+import pc from "picocolors";
 import { FixLockFileResult } from "./types";
 import { isRegistrySupported } from "./registries";
 
@@ -49,18 +49,18 @@ export const getIntegrity = async (registry: URL, packageName: string, packageVe
     }
     catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(message)}`);
+        logger.warn(`${pc.red("Error retrieving response from API:")} ${pc.blue(url.toString())} - ${pc.red(message)}`);
         return undefined;
     }
 
     if (metadata.statusCode < 200 || metadata.statusCode >= 300) {
-        logger.warn(`${chalk.red("Received")} ${chalk.blue(metadata.statusCode)} ${chalk.red("response from API:")} ${chalk.blue(url.toString())}`);
+        logger.warn(`${pc.red("Received")} ${pc.blue(metadata.statusCode)} ${pc.red("response from API:")} ${pc.blue(url.toString())}`);
         return undefined;
     }
 
     const integrity: string = metadata?.body?.dist?.integrity;
     if (!integrity?.startsWith("sha512")) {
-        logger.warn(`${chalk.red("Unable to retrieve sha512 from API response:")} ${chalk.blue(url.toString())}`);
+        logger.warn(`${pc.red("Unable to retrieve sha512 from API response:")} ${pc.blue(url.toString())}`);
         return undefined;
     }
     return integrity;
@@ -91,12 +91,12 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         jsonString = await fs.promises.readFile(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn(`${chalk.red("Lock file")} ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
+        logger.warn(`${pc.red("Lock file")} ${pc.blue(lockFileLocation)} ${pc.red("does not exist")}`);
         return FixLockFileResult.FILE_NOT_FOUND_ERROR;
     }
 
     if (typeof jsonString !== "string" || jsonString.length === 0) {
-        logger.warn(`${chalk.blue(lockFileLocation)} ${chalk.red("is empty")}`);
+        logger.warn(`${pc.blue(lockFileLocation)} ${pc.red("is empty")}`);
         return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
@@ -109,7 +109,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         lockFile = JSON.parse(jsonString);
     }
     catch (e) {
-        logger.warn(chalk.red("Cannot parse JSON"));
+        logger.warn(pc.red("Cannot parse JSON"));
         return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
@@ -124,7 +124,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
                 resolvedUrl = new URL(node.resolved);
             }
             catch (e) {
-                logger.warn(`${chalk.red("Resolved URL")} ${chalk.blue(node.resolved)} is not a valid URL`);
+                logger.warn(`${pc.red("Resolved URL")} ${pc.blue(node.resolved)} is not a valid URL`);
             }
         }
         if (node && node.version && resolvedUrl && node.integrity?.startsWith("sha1-") && isRegistrySupported(resolvedUrl)) {
@@ -161,14 +161,14 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         }
         catch (e) {
             const message = e instanceof Error ? e.message : String(e);
-            logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(message)}`);
+            logger.error(`${pc.red("Unable to write lock file")} ${pc.blue(lockFileLocation)}: ${pc.red(message)}`);
             return FixLockFileResult.FILE_WRITE_ERROR;
         }
-        logger.info(`${chalk.green("Overwriting lock file")} ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
+        logger.info(`${pc.green("Overwriting lock file")} ${pc.blue(lockFileLocation)} with ${pc.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
         return FixLockFileResult.FILE_FIXED;
     }
     else {
-        logger.info(`${chalk.green("No change needed for lock file")} ${chalk.blue(lockFileLocation)}`);
+        logger.info(`${pc.green("No change needed for lock file")} ${pc.blue(lockFileLocation)}`);
         return FixLockFileResult.FILE_NOT_CHANGED;
     }
 };

@@ -7,19 +7,19 @@ import type * as prettier from "prettier";
 import type { FixLockFileIntegrityConfig } from "./types";
 import { defaultFixLockFileIntegrityConfig, defaultPrettierOptions } from "./consts";
 import { logger } from "./logger";
-import chalk from "chalk";
+import pc from "picocolors";
 
 const MODULE_NAME: string = "fix-lockfile";
 
 const customDefaultLoader = (ext: string): LoaderSync => {
     return (filepath: string, content: string) => {
-        logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
+        logger.verbose(`Reading configuration from ${pc.magenta(filepath)}`);
         return defaultLoaders[ext](filepath, content);
     }; 
 };
 
 const customTsLoader: LoaderSync = (filepath: string, content: string) => {
-    logger.verbose(`Reading configuration from ${chalk.magenta(filepath)}`);
+    logger.verbose(`Reading configuration from ${pc.magenta(filepath)}`);
     return TypeScriptLoader()(filepath, content);
 };
 
@@ -48,7 +48,7 @@ const explorer = cosmiconfig(MODULE_NAME, {
 export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFileIntegrityConfig> => {
     let cosmiconfigResult: CosmiconfigResult;
     if (overrideConfigPath) {
-        logger.verbose(`Reading configuration from ${chalk.magenta(overrideConfigPath)}`);
+        logger.verbose(`Reading configuration from ${pc.magenta(overrideConfigPath)}`);
         cosmiconfigResult = await explorer.load(overrideConfigPath);
     }
     else {
@@ -56,7 +56,7 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
         cosmiconfigResult = await explorer.search(path.resolve("./"));
     }
     if (cosmiconfigResult?.config) {
-        logger.verbose(`Configuration read:\n${chalk.magentaBright(JSON.stringify(cosmiconfigResult.config, null, 2))}`);
+        logger.verbose(`Configuration read:\n${pc.magenta(JSON.stringify(cosmiconfigResult.config, null, 2))}`);
     }
     const prettierConfig: prettier.Options = {
         ...defaultPrettierOptions,
@@ -77,7 +77,7 @@ export const getConfig = async (overrideConfigPath?: string): Promise<FixLockFil
                     return new URL(`https://${registry}`);
                 }
                 catch (e) {
-                    logger.warn(`Invalid registry URL in configuration: ${chalk.red(registry)}`);
+                    logger.warn(`Invalid registry URL in configuration: ${pc.red(registry)}`);
                 }
             }
         }).filter(Boolean),
