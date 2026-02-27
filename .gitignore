@@ -64,3 +64,5 @@ typings/
 /.eslint-cache/
 /tsconfig.tsbuildinfo
 /publish.bat
+/.claude/settings.local.json
+/docs/plan/

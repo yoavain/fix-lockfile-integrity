@@ -8,12 +8,16 @@ on:
     tags:
       - '*.*.*'
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ '18', '20', '22' ]
+        node-version: [ '20', '22', '24' ]
 
     steps:
       - name: Checkout
@@ -24,23 +28,22 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v2.0.0
 
       - name: Dependencies Install
         run: npm ci
         env:
           CI: true
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Test
         run: npm run test
         env:
           CI: true
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Codecov
-        if: matrix.node-version == '20'
+        if: matrix.node-version == '24'
         uses: codecov/codecov-action@v5.5.2
         with:
           fail_ci_if_error: true
@@ -52,7 +55,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        node-version: [ '20' ]
+        node-version: [ '24' ]
 
     steps:
       - name: Checkout
@@ -63,40 +66,34 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v2.0.0
 
       - name: Dependencies Install
         run: npm ci
         env:
           CI: true
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Build
         run: npm run build:no-test:ci
         env:
           CI: true
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Pre-Publish - install package globally
         run: |
           FOR /F "tokens=*" %%g IN ('node -e "console.log(require(""./package.json"").version)"') do (SET VERSION=%%g)
           npm i -g fix-lockfile-integrity-%VERSION%.tgz
         shell: cmd
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Pre-Publish - test package globally
         run: |
           fix-lockfile-integrity
         shell: cmd
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Publish
-        run: npm publish
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: npm publish --provenance
 
       - name: Release
         uses: softprops/action-gh-release@v2
