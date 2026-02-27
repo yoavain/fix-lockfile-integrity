@@ -1,7 +1,5 @@
 import traverse from "traverse";
 import pLimit from "p-limit";
-import type { OptionsOfJSONResponseBody, Response } from "got";
-import got from "got";
 import fs from "fs";
 import * as prettier from "prettier";
 import { detectJsonStyle } from "./jsonUtils";
@@ -34,18 +32,15 @@ export const formHashApiUrl = (registry: URL, packageName: string, packageVersio
  * @param packageName       package name
  * @param packageVersion    package version
  */
-export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string | undefined> => {
+export const getIntegrity = async (
+    registry: URL,
+    packageName: string,
+    packageVersion: string
+): Promise<string | undefined> => {
     const url: URL = formHashApiUrl(registry, packageName, packageVersion);
-    const options: OptionsOfJSONResponseBody = {
-        responseType: "json",
-        throwHttpErrors: false,
-        headers: {
-            Accept: "application/json"
-        }
-    };
-    let metadata: Response<NPMJS_METADATA_PARTIAL>;
+    let response: globalThis.Response;
     try {
-        metadata = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+        response = await fetch(url, { headers: { Accept: "application/json" } });
     }
     catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -53,12 +48,21 @@ export const getIntegrity = async (registry: URL, packageName: string, packageVe
         return undefined;
     }
 
-    if (metadata.statusCode < 200 || metadata.statusCode >= 300) {
-        logger.warn(`${pc.red("Received")} ${pc.blue(metadata.statusCode)} ${pc.red("response from API:")} ${pc.blue(url.toString())}`);
+    if (response.status < 200 || response.status >= 300) {
+        logger.warn(`${pc.red("Received")} ${pc.blue(response.status)} ${pc.red("response from API:")} ${pc.blue(url.toString())}`);
         return undefined;
     }
 
-    const integrity: string = metadata?.body?.dist?.integrity;
+    let body: NPMJS_METADATA_PARTIAL;
+    try {
+        body = await response.json() as NPMJS_METADATA_PARTIAL;
+    }
+    catch (error) {
+        logger.warn(`${pc.red("Unable to parse JSON from API response:")} ${pc.blue(url.toString())}`);
+        return undefined;
+    }
+
+    const integrity: string = body?.dist?.integrity;
     if (!integrity?.startsWith("sha512")) {
         logger.warn(`${pc.red("Unable to retrieve sha512 from API response:")} ${pc.blue(url.toString())}`);
         return undefined;

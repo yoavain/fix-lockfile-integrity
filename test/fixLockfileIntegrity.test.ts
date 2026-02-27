@@ -1,5 +1,4 @@
 import fs from "fs";
-import got from "got";
 import { fixLockFile, FixLockFileResult, formHashApiUrl, getIntegrity, logger, parseRegistryWithPath } from "../src";
 
 const fsPromises = fs.promises;
@@ -88,7 +87,7 @@ describe("Test fix lockfile integrity", () => {
 
         it("should log warning when error retrieving response from API", async () => {
             const mockedError = new Error("Error message");
-            jest.spyOn(got, "get").mockRejectedValue(mockedError);
+            jest.spyOn(global, "fetch").mockRejectedValue(mockedError);
             jest.spyOn(logger, "warn").mockImplementation(() => {});
 
             const result = await getIntegrity(registry, packageName, packageVersion);
@@ -98,15 +97,10 @@ describe("Test fix lockfile integrity", () => {
         });
 
         it("should log warning when unable to retrieve sha512 from API response", async () => {
-            const mockedResponse = {
-                statusCode: 200,
-                body: {
-                    dist: {
-                        integrity: "sha1-abc"
-                    }
-                }
-            };
-            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(global, "fetch").mockResolvedValue({
+                status: 200,
+                json: jest.fn().mockResolvedValue({ dist: { integrity: "sha1-abc" } })
+            } as unknown as Response);
             jest.spyOn(logger, "warn").mockImplementation(() => {});
 
             const result = await getIntegrity(registry, packageName, packageVersion);
@@ -116,11 +110,10 @@ describe("Test fix lockfile integrity", () => {
         });
 
         it("should return undefined and log warning when API returns 404", async () => {
-            const mockedResponse = {
-                statusCode: 404,
-                body: {}
-            };
-            jest.spyOn(got, "get").mockResolvedValue(mockedResponse);
+            jest.spyOn(global, "fetch").mockResolvedValue({
+                status: 404,
+                json: jest.fn().mockResolvedValue({})
+            } as unknown as Response);
             jest.spyOn(logger, "warn").mockImplementation(() => {});
 
             const result = await getIntegrity(registry, packageName, packageVersion);
@@ -132,7 +125,10 @@ describe("Test fix lockfile integrity", () => {
 
     describe("Test fixLockFile", () => {
         beforeEach(() => {
-            jest.spyOn(got, "get").mockResolvedValue({ body: { dist: { integrity: SHA512 } } });
+            jest.spyOn(global, "fetch").mockResolvedValue({
+                status: 200,
+                json: jest.fn().mockResolvedValue({ dist: { integrity: SHA512 } })
+            } as unknown as Response);
 
             jest.spyOn(console, "info").mockImplementation(() => {});
             jest.spyOn(console, "error").mockImplementation(() => {});
@@ -189,7 +185,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_FIXED);
-            expect(got.get).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(SHA1, SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
         });
@@ -202,7 +198,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_FIXED);
-            expect(got.get).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(SHA1, SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
         });
@@ -215,7 +211,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_FIXED);
-            expect(got.get).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(SHA1, SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
         });
@@ -228,7 +224,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_FIXED);
-            expect(got.get).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(SHA1, SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
         });
@@ -240,7 +236,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
-            expect(got.get).not.toHaveBeenCalled();
+            expect(global.fetch).not.toHaveBeenCalled();
         });
 
         it("Should fetch same package/version only once", async () => {
@@ -251,7 +247,7 @@ describe("Test fix lockfile integrity", () => {
             const result: FixLockFileResult = await fixLockFile("fileLocation");
 
             expect(result).toEqual(FixLockFileResult.FILE_FIXED);
-            expect(got.get).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(new RegExp(SHA1, "g"), SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
         });
