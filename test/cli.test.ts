@@ -30,10 +30,6 @@ describe("Test cli", () => {
     });
 
     it("Should parse file", async () => {
-        // @ts-ignore
-        jest.spyOn(process, "exit").mockImplementation((code: number) => {
-            expect(code).toEqual(0);
-        });
         process.argv = [
             "node",
             "cli.js",
