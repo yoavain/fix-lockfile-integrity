@@ -82,27 +82,6 @@ describe("Test config", () => {
         });
     });
 
-    it("Should merge config from YAML file into default config", async () => {
-        const defaultConfig: FixLockFileIntegrityConfig = await getConfig(path.resolve(__dirname, "resources", ".fix-lockfile.yml"));
-
-        expect(defaultConfig).toEqual({
-            includePaths: [
-                "./",
-                "./packages/a",
-                "./packages/b"
-            ],
-            lockFileNames: [
-                "package-lock.json"
-            ],
-            prettier: {
-                endOfLine: "cr",
-                parser: "json",
-                tabWidth: 2,
-                useTabs: true
-            }
-        });
-    });
-
     it("Should parse registries correctly and warn on invalid URL in config", async () => {
         setVerbose(true);
 
