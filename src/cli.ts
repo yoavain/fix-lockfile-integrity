@@ -1,4 +1,4 @@
-import type { ClioOptions } from "./types";
+import type { CliOptions } from "./types";
 
 const HELP_TEXT = `Usage: fix-lockfile [options] [file]
 
@@ -19,9 +19,9 @@ Examples:
 
 Created by Yoav Vainrich at https://github.com/yoavain/fix-lockfile-integrity`;
 
-export const parseCliOptions = async (): Promise<ClioOptions> => {
+export const parseCliOptions = async (): Promise<CliOptions> => {
     const args = process.argv.slice(2);
-    const result: ClioOptions = { quiet: false, verbose: false };
+    const result: CliOptions = { quiet: false, verbose: false };
 
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];

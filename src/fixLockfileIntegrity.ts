@@ -151,7 +151,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     await Promise.all(promises);
 
     // Replace
-    const fixedLockFile = traverse(lockFile).map(function(node) {
+    traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.integrity && integrityPairsMap[node.integrity]) {
             node.integrity = integrityPairsMap[node.integrity];
             ++dirtyCount;
@@ -160,7 +160,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
 
     if (dirtyCount) {
         try {
-            const lockFileString: string = prettier.format(JSON.stringify(fixedLockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
+            const lockFileString: string = prettier.format(JSON.stringify(lockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
             await fs.promises.writeFile(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {

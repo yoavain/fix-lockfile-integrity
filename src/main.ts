@@ -1,4 +1,4 @@
-import type { ClioOptions, FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
+import type { CliOptions, FixLockFileIntegrityConfig, FixLockFileResult } from "./types";
 import { isError } from "./types";
 import { getConfig } from "./config";
 import { fixLockFile } from "./fixLockfileIntegrity";
@@ -9,7 +9,7 @@ import pc from "picocolors";
 import path from "path";
 
 export const main = async () => {
-    const cliParams: ClioOptions = await parseCliOptions();
+    const cliParams: CliOptions = await parseCliOptions();
     if (cliParams.quiet) {
         setQuiet();
     }
@@ -50,8 +50,8 @@ export const main = async () => {
     }
     
     // Handle lookup paths (throw if all file in path return an error)
-    let lookupPathCounter = 0;
-    for (const lookupPath of lookupPaths) {
+    for (let i = 0; i < lookupPaths.length; i++) {
+        const lookupPath = lookupPaths[i];
         let anyFileHandled: boolean = false;
         for (const lockFileName of config.lockFileNames) {
             const lockFile: string = path.resolve(lookupPath, lockFileName);
@@ -61,10 +61,9 @@ export const main = async () => {
             if (!isError(fixLockFileResult)) {
                 anyFileHandled = true;
             }
-            if (lookupPathCounter < lookupPaths.length * config.lockFileNames.length - 1) {
-                logger.verbose(pc.cyan("-------------------------------------------------------------------------"));
-            }
-            ++lookupPathCounter;
+        }
+        if (i < lookupPaths.length - 1) {
+            logger.verbose(pc.cyan("-------------------------------------------------------------------------"));
         }
         if (!anyFileHandled) {
             throw new Error(`Failed to handle any lock file in ${lookupPath}`);

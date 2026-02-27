@@ -1,4 +1,4 @@
-import type { ClioOptions } from "../src";
+import type { CliOptions } from "../src";
 import { parseCliOptions } from "../src";
 
 describe("Test cli", () => {
@@ -21,7 +21,7 @@ describe("Test cli", () => {
             "cli.js"
         ];
 
-        const cliOptions: ClioOptions = await parseCliOptions();
+        const cliOptions: CliOptions = await parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();
@@ -36,7 +36,7 @@ describe("Test cli", () => {
             "lockFileLocation"
         ];
 
-        const cliOptions: ClioOptions = await parseCliOptions();
+        const cliOptions: CliOptions = await parseCliOptions();
 
         expect(cliOptions.file).toEqual("lockFileLocation");
         expect(cliOptions.config).toBeUndefined();
@@ -53,7 +53,7 @@ describe("Test cli", () => {
             "lockFileLocation"
         ];
 
-        const cliOptions: ClioOptions = await parseCliOptions();
+        const cliOptions: CliOptions = await parseCliOptions();
 
         expect(cliOptions.file).toEqual("lockFileLocation");
         expect(cliOptions.config).toEqual("configFileLocation");
@@ -68,7 +68,7 @@ describe("Test cli", () => {
             "--quiet"
         ];
 
-        const cliOptions: ClioOptions = await parseCliOptions();
+        const cliOptions: CliOptions = await parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();
@@ -83,7 +83,7 @@ describe("Test cli", () => {
             "--verbose"
         ];
 
-        const cliOptions: ClioOptions = await parseCliOptions();
+        const cliOptions: CliOptions = await parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();

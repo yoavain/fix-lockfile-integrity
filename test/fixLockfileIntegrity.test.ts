@@ -82,7 +82,7 @@ describe("Test fix lockfile integrity", () => {
 
     describe("Test error handling hitting hash API", () => {
         const packageName = Object.keys(LOCKFILE_V1_SIMPLE_PACKAGE)[0];
-        const registry = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].resolved;
+        const registry: URL = parseRegistryWithPath(new URL(LOCKFILE_V1_SIMPLE_PACKAGE[packageName].resolved), packageName);
         const packageVersion = LOCKFILE_V1_SIMPLE_PACKAGE[packageName].version;
 
         it("should log warning when error retrieving response from API", async () => {
@@ -237,6 +237,21 @@ describe("Test fix lockfile integrity", () => {
 
             expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
             expect(global.fetch).not.toHaveBeenCalled();
+        });
+
+        it("Should not share cache between calls (cache isolation)", async () => {
+            // First call: SHA1 → SHA512
+            const jsonString1 = JSON.stringify(LOCKFILE_V1_SIMPLE_PACKAGE, null, 2) + "\n";
+            jest.spyOn(fsPromises, "readFile").mockResolvedValueOnce(jsonString1);
+            jest.spyOn(fsPromises, "writeFile").mockImplementation(async () => {});
+            await fixLockFile("fileLocation");
+
+            // Second call: already SHA512, no change expected
+            const jsonString2 = JSON.stringify(LOCKFILE_V1_SIMPLE_PACKAGE, null, 2).replace(SHA1, SHA512) + "\n";
+            jest.spyOn(fsPromises, "readFile").mockResolvedValueOnce(jsonString2);
+            const result = await fixLockFile("fileLocation");
+
+            expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
         });
 
         it("Should fetch same package/version only once", async () => {

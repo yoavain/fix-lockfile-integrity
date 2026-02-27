@@ -10,17 +10,13 @@ import pc from "picocolors";
 
 const MODULE_NAME: string = "fix-lockfile";
 
-const customDefaultLoader = (ext: string): LoaderSync => {
-    return (filepath: string, content: string) => {
-        logger.verbose(`Reading configuration from ${pc.magenta(filepath)}`);
-        return defaultLoaders[ext](filepath, content);
-    }; 
+const withLogging = (loader: LoaderSync): LoaderSync => (filepath, content) => {
+    logger.verbose(`Reading configuration from ${pc.magenta(filepath)}`);
+    return loader(filepath, content);
 };
 
-const customTsLoader: LoaderSync = (filepath: string, content: string) => {
-    logger.verbose(`Reading configuration from ${pc.magenta(filepath)}`);
-    return TypeScriptLoader(filepath, content);
-};
+const customDefaultLoader = (ext: string): LoaderSync => withLogging(defaultLoaders[ext]);
+const customTsLoader: LoaderSync = withLogging(TypeScriptLoader);
 
 const explorer = lilconfig(MODULE_NAME, {
     searchPlaces: [
