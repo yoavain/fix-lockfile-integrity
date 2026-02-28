@@ -122,7 +122,6 @@ export default [
             "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }], // Style
             "max-len": ["error", { code: 200 }],
             "indent": ["error", 4, { SwitchCase: 1 }],
-            "linebreak-style": ["error", "windows"],
             "quotes": ["error", "double"],
             "semi": ["error", "always"],
             "brace-style": ["error", "stroustrup"],
