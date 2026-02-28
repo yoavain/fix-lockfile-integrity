@@ -95,7 +95,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         jsonString = await fs.promises.readFile(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn(`${pc.red("Lock file")} ${pc.blue(lockFileLocation)} ${pc.red("does not exist")}`);
+        logger.verbose(`${pc.red("Lock file")} ${pc.blue(lockFileLocation)} ${pc.red("does not exist")}`);
         return FixLockFileResult.FILE_NOT_FOUND_ERROR;
     }
 
