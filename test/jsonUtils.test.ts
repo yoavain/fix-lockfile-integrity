@@ -26,4 +26,10 @@ describe("Test json utils", () => {
         const jsonStyle = detectJsonStyle(jsonString);
         expect(jsonStyle.endOfLine).toEqual("crlf");
     });
+    it("Should return default options for empty object", () => {
+        const jsonStyle = detectJsonStyle("{}");
+        expect(jsonStyle.tabWidth).toEqual(2);
+        expect(jsonStyle.useTabs).toBeFalsy();
+        expect(jsonStyle.endOfLine).toEqual("auto");
+    });
 });

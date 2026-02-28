@@ -2,10 +2,12 @@ import type { Config } from "@jest/types";
 
 const config: Config.InitialOptions = {
     transform: {
-        "^.+\\.ts$": ["ts-jest", {
-            tsconfig: "tsconfig.json",
-            isolatedModules: true
-        }]
+        "^.+\\.ts$": [
+            "ts-jest",
+            {
+                tsconfig: "tsconfig.jest.json"
+            }
+        ]
     },
     testEnvironment: "node",
     restoreMocks: true,
@@ -15,13 +17,7 @@ const config: Config.InitialOptions = {
     verbose: true,
     collectCoverage: true,
     coverageDirectory: "coverage",
-    coverageReporters: [
-        "text",
-        "text-summary",
-        "json",
-        "lcov",
-        "clover"
-    ],
+    coverageReporters: ["text", "text-summary", "json", "lcov", "clover"],
     collectCoverageFrom: ["src/**/*.ts", "!src/run.ts", "!src/index.ts", "!**/node_modules/**"]
 };
 

@@ -1,22 +1,16 @@
 import traverse from "traverse";
 import pLimit from "p-limit";
-import type { OptionsOfJSONResponseBody, Response } from "got";
-import got from "got";
 import fs from "fs";
 import * as prettier from "prettier";
 import { detectJsonStyle } from "./jsonUtils";
 import { logger } from "./logger";
-import chalk from "chalk";
+import pc from "picocolors";
 import { FixLockFileResult } from "./types";
 import { isRegistrySupported } from "./registries";
 
 const MAX_CONCURRENT_PROMISES: number = 4;
 const MODE_MODULES_PREFIX: string = "node_modules/";
 
-/**
- * Global cache: old hash -> new hash map
- */
-const integrityPairsMap: Record<string, string> = {};
 
 // Prettier config
 const prettierInitialConfig: prettier.Options = {
@@ -38,32 +32,39 @@ export const formHashApiUrl = (registry: URL, packageName: string, packageVersio
  * @param packageName       package name
  * @param packageVersion    package version
  */
-export const getIntegrity = async (registry: URL, packageName: string, packageVersion: string): Promise<string> => {
+export const getIntegrity = async (
+    registry: URL,
+    packageName: string,
+    packageVersion: string
+): Promise<string | undefined> => {
     const url: URL = formHashApiUrl(registry, packageName, packageVersion);
-    const options: OptionsOfJSONResponseBody = {
-        responseType: "json",
-        throwHttpErrors: false,
-        headers: {
-            Accept: "application/json"
-        }
-    };
-    let metadata: Response<NPMJS_METADATA_PARTIAL>;
+    let response: globalThis.Response;
     try {
-        metadata = await got.get<NPMJS_METADATA_PARTIAL>(url, options);
+        response = await fetch(url, { headers: { Accept: "application/json" } });
     }
     catch (error) {
-        logger.warn(`${chalk.red("Error retrieving response from API:")} ${chalk.blue(url.toString())} - ${chalk.red(error.message)}`);
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn(`${pc.red("Error retrieving response from API:")} ${pc.blue(url.toString())} - ${pc.red(message)}`);
         return undefined;
     }
 
-    if (metadata.statusCode < 200 || metadata.statusCode >= 300) {
-        logger.warn(`${chalk.red("Received")} ${chalk.blue(metadata.statusCode)} ${chalk.red("response from API:")} ${chalk.blue(url.toString())}`);
+    if (response.status < 200 || response.status >= 300) {
+        logger.warn(`${pc.red("Received")} ${pc.blue(response.status)} ${pc.red("response from API:")} ${pc.blue(url.toString())}`);
         return undefined;
     }
 
-    const integrity: string = metadata?.body?.dist?.integrity;
+    let body: NPMJS_METADATA_PARTIAL;
+    try {
+        body = await response.json() as NPMJS_METADATA_PARTIAL;
+    }
+    catch (error) {
+        logger.warn(`${pc.red("Unable to parse JSON from API response:")} ${pc.blue(url.toString())}`);
+        return undefined;
+    }
+
+    const integrity: string = body?.dist?.integrity;
     if (!integrity?.startsWith("sha512")) {
-        logger.warn(`${chalk.red("Unable to retrieve sha512 from API response:")} ${chalk.blue(url.toString())}`);
+        logger.warn(`${pc.red("Unable to retrieve sha512 from API response:")} ${pc.blue(url.toString())}`);
         return undefined;
     }
     return integrity;
@@ -76,11 +77,16 @@ const parsePackageName = (key: string): string => {
 
 export const parseRegistryWithPath = (url: URL, packageName: string): URL => {
     const registryUrl: URL = new URL(url.href);
-    registryUrl.pathname = registryUrl.pathname.substring(0, registryUrl.pathname.indexOf(`/${packageName}/`) + 1);
+    const index = registryUrl.pathname.indexOf(`/${packageName}/`);
+    if (index === -1) {
+        throw new Error(`Package name "${packageName}" not found in registry URL: ${url.href}`);
+    }
+    registryUrl.pathname = registryUrl.pathname.substring(0, index + 1);
     return registryUrl;
 };
 
 export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFileResult> => {
+    const integrityPairsMap: Record<string, string> = {};
     let dirtyCount: number = 0;
 
     // Read lock file
@@ -89,12 +95,12 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         jsonString = await fs.promises.readFile(lockFileLocation, "utf8");
     }
     catch (e) {
-        logger.warn(`${chalk.red("Lock file")} ${chalk.blue(lockFileLocation)} ${chalk.red("does not exist")}`);
+        logger.warn(`${pc.red("Lock file")} ${pc.blue(lockFileLocation)} ${pc.red("does not exist")}`);
         return FixLockFileResult.FILE_NOT_FOUND_ERROR;
     }
 
     if (typeof jsonString !== "string" || jsonString.length === 0) {
-        logger.warn(`${chalk.blue(lockFileLocation)} ${chalk.red("is empty")}`);
+        logger.warn(`${pc.blue(lockFileLocation)} ${pc.red("is empty")}`);
         return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
@@ -107,7 +113,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
         lockFile = JSON.parse(jsonString);
     }
     catch (e) {
-        logger.warn(chalk.red("Cannot parse JSON"));
+        logger.warn(pc.red("Cannot parse JSON"));
         return FixLockFileResult.FILE_PARSE_ERROR;
     }
 
@@ -117,11 +123,13 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
         let resolvedUrl: URL;
-        try {
-            resolvedUrl = new URL(node.resolved);
-        }
-        catch (e) {
-            logger.warn(`${chalk.red("Resolved URL")} ${chalk.blue(node.resolved)} is not a valid URL`);
+        if (node.resolved) {
+            try {
+                resolvedUrl = new URL(node.resolved);
+            }
+            catch (e) {
+                logger.warn(`${pc.red("Resolved URL")} ${pc.blue(node.resolved)} is not a valid URL`);
+            }
         }
         if (node && node.version && resolvedUrl && node.integrity?.startsWith("sha1-") && isRegistrySupported(resolvedUrl)) {
             const packageName: string = parsePackageName(this.key);
@@ -143,7 +151,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     await Promise.all(promises);
 
     // Replace
-    const fixedLockFile = traverse(lockFile).map(function(node) {
+    traverse(lockFile).forEach(function(node) {
         if (node && node.version && node.integrity && integrityPairsMap[node.integrity]) {
             node.integrity = integrityPairsMap[node.integrity];
             ++dirtyCount;
@@ -152,18 +160,19 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
 
     if (dirtyCount) {
         try {
-            const lockFileString: string = prettier.format(JSON.stringify(fixedLockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
+            const lockFileString: string = prettier.format(JSON.stringify(lockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
             await fs.promises.writeFile(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
-            logger.error(`${chalk.red("Unable to write lock file")} ${chalk.blue(lockFileLocation)}: ${chalk.red(e.message)}`);
+            const message = e instanceof Error ? e.message : String(e);
+            logger.error(`${pc.red("Unable to write lock file")} ${pc.blue(lockFileLocation)}: ${pc.red(message)}`);
             return FixLockFileResult.FILE_WRITE_ERROR;
         }
-        logger.info(`${chalk.green("Overwriting lock file")} ${chalk.blue(lockFileLocation)} with ${chalk.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
+        logger.info(`${pc.green("Overwriting lock file")} ${pc.blue(lockFileLocation)} with ${pc.red(dirtyCount)} integrity ${dirtyCount > 1 ? "fixes" : "fix"}`);
         return FixLockFileResult.FILE_FIXED;
     }
     else {
-        logger.info(`${chalk.green("No change needed for lock file")} ${chalk.blue(lockFileLocation)}`);
+        logger.info(`${pc.green("No change needed for lock file")} ${pc.blue(lockFileLocation)}`);
         return FixLockFileResult.FILE_NOT_CHANGED;
     }
 };

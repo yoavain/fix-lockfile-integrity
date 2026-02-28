@@ -23,7 +23,7 @@ export const logger = {
         console.error(message);
     },
     warn: (message: string) => {
-        if (!quiet && verbose) {
+        if (!quiet) {
             console.warn(message);
         }
     }
