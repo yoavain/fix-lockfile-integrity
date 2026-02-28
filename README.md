@@ -18,7 +18,7 @@
 ## Features
 - Reverts all `sha1` back to `sha512` which is more secure
 - Works with both package-lock.json and npm-shrinkwrap.json
-- Works with lockfile version 1 & 2
+- Works with lockfile version 1, 2 & 3
 - Can be configured to work on multiple paths to support monorepo 
 - Works only on file system without touching your version control
 
@@ -60,7 +60,7 @@ $ fix-lockfile <file>
 
 ## CLI Options
 ```
-fix-lockfile [file]
+Usage: fix-lockfile [options] [file]
 
 Fix lock file integrity
 
@@ -68,12 +68,14 @@ Positionals:
   file  file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder)
 
 Options:
-      --version  Show version number                                   [boolean]
-  -c, --config   configuration file                                     [string]
-  -v, --verbose  verbose logging                                       [boolean]
-  -q, --quiet    quiet (suppresses verbose too)                        [boolean]
-  -h, --help     Show help                                             [boolean]
+  -c, --config   configuration file                 [string]
+  -v, --verbose  verbose logging                    [boolean]
+  -q, --quiet    quiet (suppresses verbose too)     [boolean]
+  -h, --help     Show help                          [boolean]
 
+Examples:
+  fix-lockfile --config fix-lockfile.config.json package-lock.json
+  fix-lockfile --quiet
 ```
 
 ## Configuration file
@@ -133,23 +135,6 @@ module.exports = config;
         "endOfLine": "cr"
     }
 }
-```
-
-### YAML
-
-`.fix-lockfile.yaml`, ` fix-lockfile.config.yml`, `.fix-lockfile.yaml` or ` fix-lockfile.config.yml`
-
-```yaml
-includePaths:
-    - "./"
-    - "./packages/a"
-    - "./packages/b"
-lockFileNames:
-    - package-lock.json
-allRegistries: true
-prettier:
-    useTabs: true
-    endOfLine: cr
 ```
 
 ### Configuration in a Lerna monorepo
