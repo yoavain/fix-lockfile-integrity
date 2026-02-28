@@ -62,6 +62,13 @@ describe("Test fix lockfile integrity", () => {
             let registryPathUrl = parseRegistryWithPath(new URL(LOCKFILE_V1_PRIV_REG_SIMPLE_NAME_PACKAGE.i.resolved), "i");
             expect(registryPathUrl.toString()).toEqual("https://registry.company.com/private/subpath/");
         });
+
+        it("Should throw when package name is not found in resolved URL", () => {
+            expect(() => parseRegistryWithPath(
+                new URL("https://registry.npmjs.org/otherPackage/-/otherPackage-1.0.0.tgz"),
+                "missingPackage"
+            )).toThrow("Package name \"missingPackage\" not found in registry URL");
+        });
     });
 
     describe("Test API URL forming", () => {
@@ -120,6 +127,19 @@ describe("Test fix lockfile integrity", () => {
 
             expect(result).toBeUndefined();
             expect(logger.warn).toHaveBeenCalledTimes(1);
+        });
+
+        it("should return undefined and log warning when API response JSON cannot be parsed", async () => {
+            jest.spyOn(global, "fetch").mockResolvedValue({
+                status: 200,
+                json: jest.fn().mockRejectedValue(new Error("JSON parse error"))
+            } as unknown as Response);
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result = await getIntegrity(registry, packageName, packageVersion);
+
+            expect(result).toBeUndefined();
+            expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("Unable to parse JSON"));
         });
     });
 
@@ -237,6 +257,23 @@ describe("Test fix lockfile integrity", () => {
 
             expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
             expect(global.fetch).not.toHaveBeenCalled();
+        });
+
+        it("Should warn and skip node with invalid resolved URL", async () => {
+            const lockfileWithInvalidUrl = {
+                packageName: {
+                    version: "1.0.0",
+                    resolved: "not-a-url",
+                    integrity: SHA1
+                }
+            };
+            const jsonString = JSON.stringify(lockfileWithInvalidUrl, null, 2) + "\n";
+            jest.spyOn(fsPromises, "readFile").mockResolvedValue(jsonString);
+
+            const result: FixLockFileResult = await fixLockFile("fileLocation");
+
+            expect(result).toEqual(FixLockFileResult.FILE_NOT_CHANGED);
+            expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("is not a valid URL"));
         });
 
         it("Should not share cache between calls (cache isolation)", async () => {

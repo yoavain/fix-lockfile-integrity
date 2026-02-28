@@ -90,4 +90,38 @@ describe("Test cli", () => {
         expect(cliOptions.quiet).toBeFalsy();
         expect(cliOptions.verbose).toBeTruthy();
     });
+
+    it("Should parse verbose short flag", () => {
+        process.argv = ["node", "cli.js", "-v"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.verbose).toBeTruthy();
+        expect(cliOptions.quiet).toBeFalsy();
+    });
+
+    it("Should parse quiet short flag", () => {
+        process.argv = ["node", "cli.js", "-q"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.quiet).toBeTruthy();
+        expect(cliOptions.verbose).toBeFalsy();
+    });
+
+    it("Should parse config short flag", () => {
+        process.argv = ["node", "cli.js", "-c", "configFileLocation"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.config).toEqual("configFileLocation");
+    });
+
+    it("Should call process.exit on help short flag", () => {
+        process.argv = ["node", "cli.js", "-h"];
+
+        parseCliOptions();
+
+        expect(process.exit).toHaveBeenCalledWith(0);
+    });
 });
