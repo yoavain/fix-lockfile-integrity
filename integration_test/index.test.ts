@@ -29,12 +29,7 @@ describe("Integration test - fixLockFile", () => {
 
     afterEach(async () => {
         jest.restoreAllMocks();
-        try {
-            await fs.promises.unlink(tempFilePath);
-        }
-        catch {
-            // file may not exist
-        }
+        await fs.promises.rm(tempFilePath, { force: true });
     });
 
     it("should fix SHA1 integrity to SHA512", async () => {

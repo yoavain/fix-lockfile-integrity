@@ -9,7 +9,7 @@ describe("Test main logic", () => {
     });
 
     it("Test explicit file flow", async () => {
-        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+        jest.spyOn(cli, "parseCliOptions").mockReturnValue({
             file: "explicitFile",
             config: undefined,
             quiet: true,
@@ -23,7 +23,7 @@ describe("Test main logic", () => {
     });
 
     it("Test multiple explicit files via config", async () => {
-        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+        jest.spyOn(cli, "parseCliOptions").mockReturnValue({
             file: undefined,
             config: undefined,
             quiet: false,
@@ -40,7 +40,7 @@ describe("Test main logic", () => {
     });
 
     it("Test explicit file flow - error", async () => {
-        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+        jest.spyOn(cli, "parseCliOptions").mockReturnValue({
             file: "explicitFile",
             config: undefined,
             quiet: false,
@@ -58,7 +58,7 @@ describe("Test main logic", () => {
     });
 
     it("Test lookup paths flow", async () => {
-        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+        jest.spyOn(cli, "parseCliOptions").mockReturnValue({
             file: undefined,
             config: undefined,
             quiet: false,
@@ -72,7 +72,7 @@ describe("Test main logic", () => {
     });
 
     it("Test lookup paths flow - all errors", async () => {
-        jest.spyOn(cli, "parseCliOptions").mockResolvedValue({
+        jest.spyOn(cli, "parseCliOptions").mockReturnValue({
             file: undefined,
             config: undefined,
             quiet: false,

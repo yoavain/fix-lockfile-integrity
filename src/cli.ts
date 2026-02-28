@@ -19,7 +19,7 @@ Examples:
 
 Created by Yoav Vainrich at https://github.com/yoavain/fix-lockfile-integrity`;
 
-export const parseCliOptions = async (): Promise<CliOptions> => {
+export const parseCliOptions = (): CliOptions => {
     const args = process.argv.slice(2);
     const result: CliOptions = { quiet: false, verbose: false };
 

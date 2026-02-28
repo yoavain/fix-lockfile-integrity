@@ -15,13 +15,13 @@ describe("Test cli", () => {
         process.argv = originalArgv;
     });
     
-    it("Should work with no args", async () => {
+    it("Should work with no args", () => {
         process.argv = [
             "node",
             "cli.js"
         ];
 
-        const cliOptions: CliOptions = await parseCliOptions();
+        const cliOptions: CliOptions = parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();
@@ -29,14 +29,14 @@ describe("Test cli", () => {
         expect(cliOptions.verbose).toBeFalsy();
     });
 
-    it("Should parse file", async () => {
+    it("Should parse file", () => {
         process.argv = [
             "node",
             "cli.js",
             "lockFileLocation"
         ];
 
-        const cliOptions: CliOptions = await parseCliOptions();
+        const cliOptions: CliOptions = parseCliOptions();
 
         expect(cliOptions.file).toEqual("lockFileLocation");
         expect(cliOptions.config).toBeUndefined();
@@ -44,7 +44,7 @@ describe("Test cli", () => {
         expect(cliOptions.verbose).toBeFalsy();
     });
 
-    it("Should parse config", async () => {
+    it("Should parse config", () => {
         process.argv = [
             "node",
             "cli.js",
@@ -53,7 +53,7 @@ describe("Test cli", () => {
             "lockFileLocation"
         ];
 
-        const cliOptions: CliOptions = await parseCliOptions();
+        const cliOptions: CliOptions = parseCliOptions();
 
         expect(cliOptions.file).toEqual("lockFileLocation");
         expect(cliOptions.config).toEqual("configFileLocation");
@@ -61,14 +61,14 @@ describe("Test cli", () => {
         expect(cliOptions.verbose).toBeFalsy();
     });
 
-    it("Should parse quiet", async () => {
+    it("Should parse quiet", () => {
         process.argv = [
             "node",
             "cli.js",
             "--quiet"
         ];
 
-        const cliOptions: CliOptions = await parseCliOptions();
+        const cliOptions: CliOptions = parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();
@@ -76,14 +76,14 @@ describe("Test cli", () => {
         expect(cliOptions.verbose).toBeFalsy();
     });
 
-    it("Should parse verbose", async () => {
+    it("Should parse verbose", () => {
         process.argv = [
             "node",
             "cli.js",
             "--verbose"
         ];
 
-        const cliOptions: CliOptions = await parseCliOptions();
+        const cliOptions: CliOptions = parseCliOptions();
 
         expect(cliOptions.file).toBeUndefined();
         expect(cliOptions.config).toBeUndefined();

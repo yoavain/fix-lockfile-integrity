@@ -9,7 +9,7 @@ import pc from "picocolors";
 import path from "path";
 
 export const main = async () => {
-    const cliParams: CliOptions = await parseCliOptions();
+    const cliParams: CliOptions = parseCliOptions();
     if (cliParams.quiet) {
         setQuiet();
     }
@@ -50,8 +50,7 @@ export const main = async () => {
     }
     
     // Handle lookup paths (throw if all file in path return an error)
-    for (let i = 0; i < lookupPaths.length; i++) {
-        const lookupPath = lookupPaths[i];
+    for (const [i, lookupPath] of lookupPaths.entries()) {
         let anyFileHandled: boolean = false;
         for (const lockFileName of config.lockFileNames) {
             const lockFile: string = path.resolve(lookupPath, lockFileName);
