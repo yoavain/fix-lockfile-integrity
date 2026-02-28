@@ -70,7 +70,7 @@
         "@typescript-eslint/parser": "8.56.1",
         "add-shebang": "0.1.0",
         "cross-env": "10.1.0",
-        "del": "7.1.0",
+        "del": "8.0.1",
         "eslint": "9.39.3",
         "eslint-import-resolver-typescript": "4.4.4",
         "eslint-plugin-import": "2.32.0",
@@ -87,7 +87,7 @@
         "typescript": "5.9.3"
     },
     "dependencies": {
-        "@sliphua/lilconfig-ts-loader": "3.2.0",
+        "@sliphua/lilconfig-ts-loader": "3.2.2",
         "lilconfig": "3.1.3",
         "p-limit": "3.1.0",
         "picocolors": "1.1.1",
