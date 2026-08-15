@@ -1,0 +1,10 @@
+{
+    "includePaths": [
+        "./",
+        "./packages/*"
+    ],
+    "lockFileNames": [
+        "package-lock.json",
+        "npm-shrinkwrap.json"
+    ]
+}
