@@ -37,11 +37,9 @@ const isUsablePattern = (pattern: unknown): pattern is string => typeof pattern 
  * @param rootDir   root folder of the project
  */
 const isInsideRoot = (match: string, rootDir: string): boolean => {
-    const relative: string = path.relative(rootDir, path.resolve(rootDir, match));
-    if (path.isAbsolute(relative)) {
-        return false;
-    }
-    return relative !== ".." && !relative.startsWith(`..${path.sep}`);
+    const root: string = path.resolve(rootDir);
+    const absolute: string = path.resolve(root, match);
+    return absolute === root || absolute.startsWith(path.join(root, path.sep));
 };
 
 const toPosixPath = (relativePath: string): string => {

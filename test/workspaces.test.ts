@@ -194,6 +194,13 @@ describe("Test workspaces", () => {
             expect(getWorkspacePaths(path.resolve(rootDir, "project"), LOCK_FILE_NAMES)).toEqual([]);
         });
 
+        it("Should ignore a sibling folder whose name starts with the root folder name", () => {
+            writeJson("project/package.json", { workspaces: ["../project-sibling"] });
+            writePackage("project-sibling", "package-lock.json");
+
+            expect(getWorkspacePaths(path.resolve(rootDir, "project"), LOCK_FILE_NAMES)).toEqual([]);
+        });
+
         it("Should ignore a pattern that is not a string", () => {
             writeJson("package.json", { workspaces: [42, null, "packages/*"] });
             writePackage("packages/a", "package-lock.json");
