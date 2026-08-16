@@ -28,6 +28,7 @@ describe("Test config", () => {
                 "./packages/a",
                 "./packages/b"
             ],
+            includeWorkspaces: true,
             lockFileNames: [
                 "package-lock.json"
             ],
@@ -49,6 +50,7 @@ describe("Test config", () => {
                 "./packages/a",
                 "./packages/b"
             ],
+            includeWorkspaces: true,
             lockFileNames: [
                 "package-lock.json"
             ],
@@ -70,6 +72,7 @@ describe("Test config", () => {
                 "./packages/a",
                 "./packages/b"
             ],
+            includeWorkspaces: true,
             lockFileNames: [
                 "package-lock.json"
             ],
@@ -93,6 +96,7 @@ describe("Test config", () => {
                 "./packages/a",
                 "./packages/b"
             ],
+            includeWorkspaces: true,
             lockFileNames: [
                 "package-lock.json"
             ],
