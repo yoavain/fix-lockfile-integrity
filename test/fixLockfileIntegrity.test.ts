@@ -51,6 +51,19 @@ const LOCKFILE_V2_SCOPED_PACKAGE = {
     }
 };
 
+// npm records a workspace package as a link. "resolved" holds a relative path and there is no integrity
+const LOCKFILE_V2_WORKSPACE_LINK = {
+    "node_modules/@scopeName/a": {
+        resolved: "packages/a",
+        link: true
+    },
+    "node_modules/packageName": {
+        version: "1.0.0",
+        resolved: "https://registry.npmjs.org/packageName/-/packageName-1.0.0.tgz",
+        integrity: SHA1
+    }
+};
+
 describe("Test fix lockfile integrity", () => {
     describe("Test registry parsing from resolved field", () => {
         it("Test simple package name", () => {
@@ -208,6 +221,19 @@ describe("Test fix lockfile integrity", () => {
             expect(global.fetch).toHaveBeenCalledTimes(1);
             const expectedJsonString = jsonString.replace(SHA1, SHA512);
             expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", expectedJsonString, "utf8");
+        });
+
+        it("Should not warn about a workspace link entry", async () => {
+            const jsonString = JSON.stringify(LOCKFILE_V2_WORKSPACE_LINK, null, 2) + "\n";
+            jest.spyOn(fsPromises, "readFile").mockResolvedValue(jsonString);
+            jest.spyOn(fsPromises, "writeFile").mockImplementation(async () => {});
+            jest.spyOn(logger, "warn").mockImplementation(() => {});
+
+            const result: FixLockFileResult = await fixLockFile("fileLocation");
+
+            expect(result).toEqual(FixLockFileResult.FILE_FIXED);
+            expect(logger.warn).not.toHaveBeenCalled();
+            expect(fsPromises.writeFile).toHaveBeenCalledWith("fileLocation", jsonString.replace(SHA1, SHA512), "utf8");
         });
 
         it("Should handle lock file version 1 - scoped package", async () => {
