@@ -28,6 +28,22 @@ const expandPattern = (pattern: string, rootDir: string): Array<string> => fs.gl
 
 const isUsablePattern = (pattern: unknown): pattern is string => typeof pattern === "string" && pattern.length > 0;
 
+/**
+ * Tells if a match stays inside the root folder.
+ * The cwd option of globSync does not confine a match, therefore a "../" pattern or an absolute pattern escapes.
+ * npm does not support a workspace outside the project, therefore the tool drops such a match
+ *
+ * @param match     path that a pattern matched
+ * @param rootDir   root folder of the project
+ */
+const isInsideRoot = (match: string, rootDir: string): boolean => {
+    const relative: string = path.relative(rootDir, path.resolve(rootDir, match));
+    if (path.isAbsolute(relative)) {
+        return false;
+    }
+    return relative !== ".." && !relative.startsWith(`..${path.sep}`);
+};
+
 const toPosixPath = (relativePath: string): string => {
     const posixPath: string = relativePath.split(path.sep).join("/");
     return posixPath === "." ? "./" : `./${posixPath}`;
@@ -58,7 +74,8 @@ export const getWorkspacePatterns = (rootDir: string): Array<string> => {
 
 /**
  * Finds the workspace folders of a project that hold a lock file.
- * A folder without a lock file fails the run, therefore it is filtered out
+ * A folder without a lock file fails the run, therefore it is filtered out.
+ * A folder outside the root folder is filtered out too
  *
  * @param rootDir           root folder of the project
  * @param lockFileNames     lock file names to look for
@@ -73,6 +90,7 @@ export const getWorkspacePaths = (rootDir: string, lockFileNames: Array<string>)
 
     return [...matches]
         .filter((match: string) => !excluded.has(match))
+        .filter((match: string) => isInsideRoot(match, rootDir))
         .filter((match: string) => lockFileNames.some((lockFileName: string) => fs.existsSync(path.resolve(rootDir, match, lockFileName))))
         .map(toPosixPath)
         .sort();

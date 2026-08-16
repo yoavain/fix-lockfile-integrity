@@ -178,6 +178,22 @@ describe("Test workspaces", () => {
             expect(getWorkspacePaths(rootDir, LOCK_FILE_NAMES)).toEqual(["./packages/a"]);
         });
 
+        it("Should ignore a pattern that escapes the root folder", () => {
+            writeJson("project/package.json", { workspaces: ["../outside/*", "packages/*"] });
+            writePackage("outside/pkg", "package-lock.json");
+            writePackage("project/packages/a", "package-lock.json");
+
+            expect(getWorkspacePaths(path.resolve(rootDir, "project"), LOCK_FILE_NAMES)).toEqual(["./packages/a"]);
+        });
+
+        it("Should ignore an absolute pattern", () => {
+            const outsideDir: string = path.resolve(rootDir, "outside").split(path.sep).join("/");
+            writeJson("project/package.json", { workspaces: [`${outsideDir}/*`] });
+            writePackage("outside/pkg", "package-lock.json");
+
+            expect(getWorkspacePaths(path.resolve(rootDir, "project"), LOCK_FILE_NAMES)).toEqual([]);
+        });
+
         it("Should ignore a pattern that is not a string", () => {
             writeJson("package.json", { workspaces: [42, null, "packages/*"] });
             writePackage("packages/a", "package-lock.json");
