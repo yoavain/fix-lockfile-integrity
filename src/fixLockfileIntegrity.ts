@@ -160,7 +160,7 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
 
     if (dirtyCount) {
         try {
-            const lockFileString: string = prettier.format(JSON.stringify(lockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
+            const lockFileString: string = await prettier.format(JSON.stringify(lockFile, null, 2), { ...prettierInitialConfig, ...jsonStyleOptions });
             await fs.promises.writeFile(lockFileLocation, lockFileString, "utf8");
         }
         catch (e) {
