@@ -64,5 +64,6 @@ typings/
 /.eslint-cache/
 *.tsbuildinfo
 /publish.bat
+/publish-beta.bat
 /.claude/settings.local.json
 /docs/plan/

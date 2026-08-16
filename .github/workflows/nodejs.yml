@@ -65,6 +65,17 @@ jobs:
           cache: npm
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Verify tag matches package version
+        shell: bash
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          PACKAGE_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$PACKAGE_VERSION" != "$TAG_NAME" ]; then
+            echo "Tag $TAG_NAME does not match package.json version $PACKAGE_VERSION"
+            exit 1
+          fi
+
       - name: Dependencies Install
         run: npm ci
         env:
@@ -87,11 +98,12 @@ jobs:
         shell: cmd
 
       - name: Publish
-        run: npm publish --provenance
+        run: npm publish --provenance --tag ${{ contains(github.ref_name, '-') && 'beta' || 'latest' }}
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: fix-lockfile-integrity-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
