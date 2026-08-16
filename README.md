@@ -19,7 +19,7 @@
 - Reverts all `sha1` back to `sha512` which is more secure
 - Works with both package-lock.json and npm-shrinkwrap.json
 - Works with lockfile version 1, 2 & 3
-- Can be configured to work on multiple paths to support monorepo 
+- Finds monorepo workspace folders automatically (npm, yarn, lerna), or works on configured paths
 - Works only on file system without touching your version control
 
 
@@ -43,7 +43,8 @@ npx fix-lockfile-integrity
 
 ## Usage
 
-Check local folder for a lockfile (package-lock.json or npm-shrinkwrap.json) and fix any `sha1` in it
+Check local folder for a lockfile (package-lock.json or npm-shrinkwrap.json) and fix any `sha1` in it.
+In a monorepo, the workspace folders are checked too — see [Monorepo support](#monorepo-support).
 
 ```sh
 $ fix-lockfile
@@ -68,10 +69,11 @@ Positionals:
   file  file to fix (default: looks for package-lock.json/npm-shrinkwrap.json in running folder)
 
 Options:
-  -c, --config   configuration file                 [string]
-  -v, --verbose  verbose logging                    [boolean]
-  -q, --quiet    quiet (suppresses verbose too)     [boolean]
-  -h, --help     Show help                          [boolean]
+  -c, --config              configuration file                [string]
+  -v, --verbose             verbose logging                   [boolean]
+  -q, --quiet               quiet (suppresses verbose too)    [boolean]
+      --disable-workspaces  do not detect workspace folders   [boolean]
+  -h, --help                Show help                         [boolean]
 
 Examples:
   fix-lockfile --config fix-lockfile.config.json package-lock.json
@@ -80,8 +82,8 @@ Examples:
 
 ## Configuration file
 
-Configuration file can be in several formats and are automatically loaded.  
-Alternatively, you can specify configuration file to load via CLI `--config` (alias: `-c`) 
+A configuration file is loaded automatically, in any of the formats below.  
+You can also give the path to one with `--config` (alias: `-c`).
 
 ### TypeScript
 
@@ -137,39 +139,48 @@ module.exports = config;
 }
 ```
 
-### Configuration in a Lerna monorepo
+### Monorepo support
 
-For root folder and all lerna packages
+In a monorepo, the tool finds the workspace folders on its own. No configuration is needed. It reads:
 
-```js
-const { execSync } = require("child_process");
-const path = require("path");
+1. `workspaces` in `package.json` — npm and yarn, in the array form or the object form
+2. `packages` in `lerna.json` — legacy Lerna projects
+3. `packages/*` — when `lerna.json` holds no `packages` property
 
-const lernaInfoOutput = execSync("lerna list --all --json", { encoding: "utf8" });
-const lernaPackages = JSON.parse(lernaInfoOutput).map(p => path.relative(__dirname, p.location));
-
-const config = {
-    includePaths: [
-        "./",
-        ...lernaPackages
-    ],
-    lockFileNames: [
-        "package-lock.json"
-    ],
-    allRegistries: true
-};
-
-module.exports = config;
+```sh
+$ fix-lockfile --verbose
+Detected workspace ./packages/a
+Detected workspace ./packages/b
 ```
+
+A workspace folder without a lock file is skipped. Therefore npm workspaces, which keep one lock file in the
+root folder, need no change.
+
+To stop the detection, use `--disable-workspaces`, or set `includeWorkspaces: false`.
+
+For a layout with no workspace definition, list the folders in `includePaths`:
+
+```json
+{
+    "includePaths": ["./", "./packages/a", "./packages/b"]
+}
+```
+
+Notes:
+- `includePaths` holds folders. It does not accept glob patterns, for example `packages/*`.
+- A folder in `includePaths` without a lock file fails the run. A detected workspace folder always holds one.
+- The paths resolve against the folder that you run the tool from.
+- pnpm and yarn write `pnpm-lock.yaml` and `yarn.lock`. This tool does not fix those files.
 
 ### Configuration options
 ```
-- includeFiles:     Explicit list of files to fix       (default: none)
-- includePaths:     Paths to look for lock files in     (default: ".")
-- lockFileNames:    Lock files to look for              (default: ["package-lock.json", "npm-shrinkwrap.json"])
-- allRegistries:    Fetch integrity from all registries (default: false)
-- registries:       Registries to fetch integrity from (default: ["registry.npmjs.org"])
-- prettier:         Overriding prettier config in case needed
+- includeFiles:      Explicit list of files to fix       (default: none)
+- includePaths:      Paths to look for lock files in     (default: ".")
+- includeWorkspaces: Add the detected workspace folders  (default: true)
+- lockFileNames:     Lock files to look for              (default: ["package-lock.json", "npm-shrinkwrap.json"])
+- allRegistries:     Fetch integrity from all registries (default: false)
+- registries:        Registries to fetch integrity from  (default: ["registry.npmjs.org"])
+- prettier:          Overriding prettier config in case needed
 ```
 
 ## Automation
@@ -183,6 +194,7 @@ This way it will run after each time you run `npm install`
     "postinstall": "fix-lockfile package-lock.json"
 }
 ```
+In a monorepo, use `fix-lockfile` without a file name. A file name turns the workspace detection off.
 
 #### 2) pre-commit hook
 Using husky (or alike) to run as a pre-commit hook

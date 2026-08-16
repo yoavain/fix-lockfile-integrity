@@ -47,32 +47,43 @@ Entry points:
 - `src/index.ts` — Library entry point; re-exports public API
 
 Core flow (`src/main.ts`):
-1. Parse CLI args (`src/cli.ts` via yargs)
-2. Load config (`src/config.ts` via cosmiconfig — supports `.json`, `.js`, `.ts`, `.yaml`)
-3. Find lockfiles (`package-lock.json` or `npm-shrinkwrap.json`) in configured paths
-4. Process each lockfile via `fixLockFile()` in `src/fixLockfileIntegrity.ts`
+1. Parse CLI args (`src/cli.ts` via `util.parseArgs`)
+2. Load config (`src/config.ts` via lilconfig — `.fix-lockfile.{json,js,ts}` or `fix-lockfile.config.{json,js,ts}`)
+3. Collect lookup paths: `includePaths` from config, plus the workspace folders found by `src/workspaces.ts` (unless `--disable-workspaces` or `includeWorkspaces: false`)
+4. Find lockfiles (`package-lock.json` or `npm-shrinkwrap.json`) in those paths
+5. Process each lockfile via `fixLockFile()` in `src/fixLockfileIntegrity.ts`
+
+A lookup path holding no lockfile throws; an explicit file (positional arg or `includeFiles`) skips workspace detection.
 
 Key modules:
 - `src/fixLockfileIntegrity.ts` — Core logic: traverses lockfile JSON, finds SHA1 integrity entries, fetches SHA512 from registry API, rewrites file
+- `src/cli.ts` — CLI parsing via `util.parseArgs` with `strict: true`, so an unknown option throws
+- `src/config.ts` — lilconfig loader; merges the user config over `defaultFixLockFileIntegrityConfig`
+- `src/workspaces.ts` — Detects monorepo workspace folders (npm/yarn `workspaces`, then legacy `lerna.json` `packages`); returns only folders that hold a lockfile
 - `src/jsonUtils.ts` — Detects and preserves original JSON formatting (indent style, EOL)
 - `src/registries.ts` — Manages allowed registries (default: registry.npmjs.org)
 - `src/logger.ts` — Shared logger respecting `--verbose`/`--quiet` flags
+- `src/consts.ts` — Default config and default prettier options
 - `src/types.ts` — Shared types; `FixLockFileResult` enum for operation outcomes
 
 Build output goes to `dist/`. The build adds a shebang to `dist/run.js` for CLI use.
 
 ## Code Style
 
-- ESLint with `@typescript-eslint`, `eslint-plugin-security`, `eslint-plugin-import`
-- Max line length: 200 chars
-- Max function length: 50 lines
-- Windows linebreak style (CRLF) enforced
+Flat config in `eslint.config.mjs`:
+- ESLint with `@typescript-eslint`, `eslint-plugin-security`, `eslint-plugin-import`, `eslint-plugin-n`, `eslint-plugin-jest`
+- Max line length: 200 chars (`max-len`, error)
+- Max function length: 75 lines (`max-lines-per-function`, warn — warnings do not fail the lint script)
+- 4-space indent, double quotes, semicolons, stroustrup braces, no trailing commas
 - Consistent type imports required (`import type`)
 - No eval, no prototype pollution patterns
+- `n/no-unsupported-features/node-builtins` ignores `fs.globSync`, which is experimental below Node 22.17 while `engines` allows `>=22`
+- CRLF comes from `.prettierrc` (`endOfLine: crlf`); lint-staged runs prettier on `*.json` only, not on TS
 
 ## Testing
 
 - Jest with `ts-jest` (no compilation step needed to run tests)
 - Unit tests in `test/`
 - Integration tests in `integration_test/`
-- Coverage thresholds enforced; reported to codecov
+- `test/workspaces.test.ts` builds temp folder trees in `os.tmpdir()` rather than using fixtures
+- Coverage is collected on every run; there are no local thresholds in `jest.config.ts`. CI uploads it to codecov (`.github/workflows/nodejs.yml`)

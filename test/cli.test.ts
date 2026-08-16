@@ -124,4 +124,70 @@ describe("Test cli", () => {
 
         expect(process.exit).toHaveBeenCalledWith(0);
     });
+
+    it("Should call process.exit on help long flag", () => {
+        process.argv = ["node", "cli.js", "--help"];
+
+        parseCliOptions();
+
+        expect(process.exit).toHaveBeenCalledWith(0);
+    });
+
+    it("Should parse config with equals sign", () => {
+        process.argv = ["node", "cli.js", "--config=configFileLocation", "lockFileLocation"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.config).toEqual("configFileLocation");
+        expect(cliOptions.file).toEqual("lockFileLocation");
+    });
+
+    it("Should parse disable-workspaces", () => {
+        process.argv = ["node", "cli.js", "--disable-workspaces"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.disableWorkspaces).toBeTruthy();
+    });
+
+    it("Should default disable-workspaces to false", () => {
+        process.argv = ["node", "cli.js"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.disableWorkspaces).toBeFalsy();
+    });
+
+    it("Should parse both quiet and verbose", () => {
+        process.argv = ["node", "cli.js", "-q", "-v"];
+
+        const cliOptions: CliOptions = parseCliOptions();
+
+        expect(cliOptions.quiet).toBeTruthy();
+        expect(cliOptions.verbose).toBeTruthy();
+    });
+
+    it("Should throw on unknown option", () => {
+        process.argv = ["node", "cli.js", "--unknown"];
+
+        expect(() => parseCliOptions()).toThrow("Unknown option");
+    });
+
+    it("Should throw on unknown short option", () => {
+        process.argv = ["node", "cli.js", "-x"];
+
+        expect(() => parseCliOptions()).toThrow("Unknown option");
+    });
+
+    it("Should throw on config without a value", () => {
+        process.argv = ["node", "cli.js", "-c"];
+
+        expect(() => parseCliOptions()).toThrow();
+    });
+
+    it("Should throw on more than one file", () => {
+        process.argv = ["node", "cli.js", "lockFileLocation1", "lockFileLocation2"];
+
+        expect(() => parseCliOptions()).toThrow("Expected a single file to fix, but got 2: lockFileLocation1, lockFileLocation2");
+    });
 });

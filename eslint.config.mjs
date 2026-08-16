@@ -100,6 +100,9 @@ export default [
                 }
             ],
             "n/no-missing-import": 0,
+            // fs.globSync exists from Node 22.0.0. It is marked stable from Node 22.17.0.
+            // src/workspaces.ts uses the cwd option only, which did not change
+            "n/no-unsupported-features/node-builtins": ["error", { ignores: ["fs.globSync"] }],
             "n/no-unpublished-import": 0,
             "n/no-unsupported-features/es-syntax": 0,
             "import/extensions": [

@@ -13,5 +13,6 @@ export const defaultPrettierOptions: prettier.Options = {
 
 export const defaultFixLockFileIntegrityConfig: FixLockFileIntegrityConfig = {
     includePaths: [path.resolve("./")],
+    includeWorkspaces: true,
     lockFileNames: LOCK_FILE_NAMES
 };

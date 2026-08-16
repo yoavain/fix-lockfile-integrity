@@ -62,7 +62,8 @@ typings/
 /.husky/_/husky.sh
 /npm-shrinkwrap.json
 /.eslint-cache/
-/tsconfig.tsbuildinfo
+*.tsbuildinfo
 /publish.bat
+/publish-beta.bat
 /.claude/settings.local.json
 /docs/plan/

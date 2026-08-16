@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ '20', '22', '24' ]
+        node-version: [ '22', '24', '26' ]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -41,7 +41,7 @@ jobs:
 
       - name: Codecov
         if: matrix.node-version == '24'
-        uses: codecov/codecov-action@v5.5.2
+        uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -56,14 +56,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify tag matches package version
+        shell: bash
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          PACKAGE_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$PACKAGE_VERSION" != "$TAG_NAME" ]; then
+            echo "Tag $TAG_NAME does not match package.json version $PACKAGE_VERSION"
+            exit 1
+          fi
 
       - name: Dependencies Install
         run: npm ci
@@ -87,11 +98,12 @@ jobs:
         shell: cmd
 
       - name: Publish
-        run: npm publish --provenance
+        run: npm publish --provenance --tag ${{ contains(github.ref_name, '-') && 'beta' || 'latest' }}
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: fix-lockfile-integrity-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

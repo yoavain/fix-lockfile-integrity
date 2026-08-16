@@ -5,11 +5,13 @@ export type CliOptions = {
     config?: string
     quiet: boolean
     verbose: boolean
+    disableWorkspaces?: boolean
 }
 
 export type FixLockFileIntegrityConfig = {
     includeFiles?: Array<string>
     includePaths?: Array<string>
+    includeWorkspaces?: boolean
     lockFileNames?: Array<string>
     registries?: Array<URL>
     allRegistries?: boolean

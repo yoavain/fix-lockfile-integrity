@@ -6,3 +6,4 @@ export * from "./fixLockfileIntegrity";
 export * from "./logger";
 export * from "./main";
 export * from "./types";
+export * from "./workspaces";
