@@ -123,7 +123,9 @@ export const fixLockFile = async (lockFileLocation: string): Promise<FixLockFile
     let hashesFound: Set<string> = new Set<string>();
     traverse(lockFile).forEach(function(node) {
         let resolvedUrl: URL;
-        if (node.resolved) {
+        // A workspace link entry holds a relative path in "resolved" and holds no integrity.
+        // Therefore the tool parses the URL only for an entry that needs a fix
+        if (node.resolved && node.integrity?.startsWith("sha1-")) {
             try {
                 resolvedUrl = new URL(node.resolved);
             }
