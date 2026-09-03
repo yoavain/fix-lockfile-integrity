@@ -60,7 +60,7 @@
     },
     "homepage": "https://github.com/yoavain/fix-lockfile-integrity#readme",
     "devDependencies": {
-        "@eslint/compat": "2.1.0",
+        "@eslint/compat": "2.1.1",
         "@eslint/eslintrc": "3.3.7",
         "@eslint/js": "9.39.5",
         "@tsconfig/node22": "22.0.6",
