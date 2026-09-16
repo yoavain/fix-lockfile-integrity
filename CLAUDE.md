@@ -71,7 +71,7 @@ Build output goes to `dist/`. The build adds a shebang to `dist/run.js` for CLI 
 ## Code Style
 
 Flat config in `eslint.config.mjs`:
-- ESLint with `@typescript-eslint`, `eslint-plugin-security`, `eslint-plugin-import`, `eslint-plugin-n`, `eslint-plugin-jest`
+- ESLint with `@typescript-eslint`, `eslint-plugin-security`, `eslint-plugin-import-x`, `eslint-plugin-n`, `eslint-plugin-jest`
 - Max line length: 200 chars (`max-len`, error)
 - Max function length: 75 lines (`max-lines-per-function`, warn — warnings do not fail the lint script)
 - 4-space indent, double quotes, semicolons, stroustrup braces, no trailing commas

@@ -40,7 +40,7 @@ const parse = (args: string[]) => {
     }
     catch (e) {
         // parseArgs throws a TypeError with an ERR_PARSE_ARGS_* code
-        throw new Error(`${(e as Error).message}\n${HELP_HINT}`);
+        throw new Error(`${(e as Error).message}\n${HELP_HINT}`, { cause: e });
     }
 };
 
