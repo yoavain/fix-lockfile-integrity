@@ -9,6 +9,10 @@
             "automerge": true
         },
         {
+            "depTypeList": ["dependencies"],
+            "minimumReleaseAge": "14 days"
+        },
+        {
             "depTypeList": ["devDependencies"],
             "labels": ["dev-dependencies"],
             "updateTypes": ["minor", "patch"],
