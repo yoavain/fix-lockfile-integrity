@@ -67,3 +67,4 @@ typings/
 /publish-beta.bat
 /.claude/settings.local.json
 /docs/plan/
+/inst.bat
