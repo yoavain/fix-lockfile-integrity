@@ -5,8 +5,7 @@
         {
             "depTypeList": ["dependencies"],
             "labels": ["dependencies"],
-            "updateTypes": ["minor", "patch"],
-            "automerge": true
+            "updateTypes": ["minor", "patch"]
         },
         {
             "depTypeList": ["dependencies"],
@@ -15,8 +14,7 @@
         {
             "depTypeList": ["devDependencies"],
             "labels": ["dev-dependencies"],
-            "updateTypes": ["minor", "patch"],
-            "automerge": true
+            "updateTypes": ["minor", "patch"]
         }
     ],
     "prConcurrentLimit": 5,
